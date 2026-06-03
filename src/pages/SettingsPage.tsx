@@ -4,6 +4,7 @@ import { useSettings, useUpdateSettings } from '@/hooks/useSettings';
 import { useHolidays, useAddHoliday, useDeleteHoliday } from '@/hooks/useHolidays';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast, Card, Button, Input, TimePicker } from '@/components/ui';
+import { requestNotificationPermission } from '@/lib/notifications';
 
 const dayLabels = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
 
@@ -67,6 +68,17 @@ export function SettingsPage() {
     setWorkDays((prev) =>
       prev.includes(day) ? prev.filter((d) => d !== day) : [...prev, day]
     );
+  };
+
+  const handleToggleNotifications = async () => {
+    if (!notificationsEnabled) {
+      const granted = await requestNotificationPermission();
+      if (!granted) {
+        showToast('Permissão de notificação negada', 'error');
+        return;
+      }
+    }
+    setNotificationsEnabled(!notificationsEnabled);
   };
 
   const handleAddHoliday = () => {
@@ -139,7 +151,7 @@ export function SettingsPage() {
         <div className="flex items-center justify-between">
           <span className="text-sm text-gray-700">Ativar notificações</span>
           <button
-            onClick={() => setNotificationsEnabled(!notificationsEnabled)}
+            onClick={handleToggleNotifications}
             className={`w-12 h-7 rounded-full transition-colors ${
               notificationsEnabled ? 'bg-blue-500' : 'bg-gray-300'
             }`}

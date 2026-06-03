@@ -6,8 +6,11 @@ import { PunchPage } from '@/pages/PunchPage';
 import { BankPage } from '@/pages/BankPage';
 import { HistoryPage } from '@/pages/HistoryPage';
 import { SettingsPage } from '@/pages/SettingsPage';
+import { useNotifications } from '@/hooks/useNotifications';
 
 export default function App() {
+  useNotifications();
+
   return (
     <BrowserRouter>
       <Routes>
