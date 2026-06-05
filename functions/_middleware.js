@@ -1,7 +1,3 @@
-const SUPABASE_ORIGIN = 'https://sfpilqfqkuzqyswgyolx.supabase.co';
-
-const API_PATHS = ['/auth/v1/', '/rest/v1/', '/storage/v1/', '/realtime/v1/'];
-
 const MIME_TYPES = {
   js: 'text/javascript',
   css: 'text/css',
@@ -16,44 +12,18 @@ export async function onRequest(context) {
   const { request, next } = context;
   const url = new URL(request.url);
 
-  const isApiRequest = API_PATHS.some(path => url.pathname.startsWith(path));
+  const response = await next();
+  const ext = url.pathname.split('.').pop();
+  const contentType = MIME_TYPES[ext];
 
-  if (!isApiRequest) {
-    const response = await next();
-    const ext = url.pathname.split('.').pop();
-    const contentType = MIME_TYPES[ext];
-    if (contentType) {
-      const headers = new Headers(response.headers);
-      headers.set('Content-Type', contentType);
-      return new Response(response.body, {
-        status: response.status,
-        statusText: response.statusText,
-        headers,
-      });
-    }
-    return response;
-  }
-
-  const proxyUrl = new URL(url.pathname + url.search, SUPABASE_ORIGIN);
-
-  const method = request.method;
-  const headers = new Headers(request.headers);
-  headers.delete('content-length');
-
-  let body = null;
-  if (method !== 'GET' && method !== 'HEAD') {
-    body = await request.text();
-  }
-
-  const response = await fetch(proxyUrl.toString(), {
-    method,
-    headers,
-    body,
-  });
-
-  if (!response.ok) {
-    const responseBody = await response.clone().text();
-    console.error('[PROXY ERROR]', response.status, method, url.pathname, responseBody);
+  if (contentType) {
+    const headers = new Headers(response.headers);
+    headers.set('Content-Type', contentType);
+    return new Response(response.body, {
+      status: response.status,
+      statusText: response.statusText,
+      headers,
+    });
   }
 
   return response;
