@@ -3,7 +3,7 @@
   "mcp": {
     "supabase": {
       "type": "remote",
-      "url": "https://mcp.supabase.com/mcp?project_ref=sfpilqfqkuzqyswgyolx&read_only=true",
+      "url": "https://mcp.supabase.com/mcp?project_ref=sfpilqfqkuzqyswgyolx",
       "enabled": true
     }
   }
