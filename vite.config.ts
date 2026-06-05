@@ -13,6 +13,7 @@ export default defineConfig({
         name: 'Controle de Ponto',
         short_name: 'Ponto',
         description: 'Controle de ponto pessoal',
+        lang: 'pt-BR',
         start_url: '/',
         display: 'standalone',
         background_color: '#ffffff',
