@@ -1,5 +1,7 @@
-# Assets estaticos - servir diretamente
-/assets/*  /assets/:splat  200
+# API paths - nao redirecionar (middleware do Cloudflare vai tratar)
+/auth/v1/*  /auth/v1/:splat  200
+/rest/v1/*  /rest/v1/:splat  200
+/storage/v1/*  /storage/v1/:splat  200
 
-# SPA fallback - tudo que nao for asset vai para index.html
+# SPA fallback - tudo que nao for API nem asset vai para index.html
 /*  /index.html  200

@@ -1,9 +1,6 @@
-# Cloudflare Pages headers
-# Assets: force correct MIME types (Cloudflare sometimes serves .js as application/octet-stream)
 /assets/*
   Content-Type: text/javascript
 
-# Service worker
 /sw.js
   Content-Type: text/javascript
 
