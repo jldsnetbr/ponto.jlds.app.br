@@ -66,8 +66,9 @@ export function PunchPage() {
           };
           showToast(`${labels[tipoPendente]} registrada às ${horario}`, 'success');
         },
-        onError: () => {
-          showToast('Erro ao registrar ponto', 'error');
+        onError: (err) => {
+          console.error('[PUNCH ERRO]', err);
+          showToast((err as any)?.message || 'Erro ao registrar ponto', 'error');
         },
       }
     );
@@ -79,7 +80,10 @@ export function PunchPage() {
       { id, updates: { [tipo]: horario } },
       {
         onSuccess: () => showToast('Batida atualizada', 'success'),
-        onError: () => showToast('Erro ao atualizar batida', 'error'),
+        onError: (err) => {
+          console.error('[EDIT ERRO]', err);
+          showToast((err as any)?.message || 'Erro ao atualizar batida', 'error');
+        },
       }
     );
   };
@@ -102,7 +106,10 @@ export function PunchPage() {
           };
           showToast(`${labels[deleteConfirm.tipo]} removida`, 'success');
         },
-        onError: () => showToast('Erro ao remover batida', 'error'),
+        onError: (err) => {
+          console.error('[DELETE ERRO]', err);
+          showToast((err as any)?.message || 'Erro ao remover batida', 'error');
+        },
       }
     );
     setDeleteConfirm(null);

@@ -69,7 +69,10 @@ export function HistoryPage() {
       },
       {
         onSuccess: () => showToast('Alterações salvas', 'success'),
-        onError: () => showToast('Erro ao salvar alterações', 'error'),
+        onError: (err) => {
+          console.error('[HISTORY ERRO]', err);
+          showToast((err as any)?.message || 'Erro ao salvar alterações', 'error');
+        },
       }
     );
   };
