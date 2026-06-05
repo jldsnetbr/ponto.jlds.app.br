@@ -1,21 +1,16 @@
 -- ========================================
--- Migration: Schema inicial
+-- Migration: Schema inicial (sem tabela users)
+-- Usa auth.users do Supabase Auth diretamente
 -- Execute no Supabase SQL Editor
 -- ========================================
 
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
--- Tabela: users
-CREATE TABLE users (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  email VARCHAR(255) UNIQUE NOT NULL,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
-
 -- Tabela: user_settings
+-- FK diretamente para auth.users (built-in do Supabase Auth)
 CREATE TABLE user_settings (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID REFERENCES users(id) ON DELETE CASCADE UNIQUE,
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE UNIQUE,
   work_hours_start TIME NOT NULL DEFAULT '08:00:00',
   work_hours_end TIME NOT NULL DEFAULT '17:00:00',
   lunch_break_start TIME NOT NULL DEFAULT '12:00:00',
@@ -32,7 +27,7 @@ CREATE TABLE user_settings (
 -- Tabela: time_entries
 CREATE TABLE time_entries (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
   date DATE NOT NULL,
   entry_1 TIMESTAMP WITH TIME ZONE,
   exit_1 TIMESTAMP WITH TIME ZONE,
@@ -49,7 +44,7 @@ CREATE TABLE time_entries (
 -- Tabela: holidays
 CREATE TABLE holidays (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
   date DATE NOT NULL,
   name VARCHAR(255) NOT NULL,
   is_national BOOLEAN NOT NULL DEFAULT false,
@@ -57,13 +52,9 @@ CREATE TABLE holidays (
 );
 
 -- RLS
-ALTER TABLE users ENABLE ROW LEVEL SECURITY;
 ALTER TABLE user_settings ENABLE ROW LEVEL SECURITY;
 ALTER TABLE time_entries ENABLE ROW LEVEL SECURITY;
 ALTER TABLE holidays ENABLE ROW LEVEL SECURITY;
-
-CREATE POLICY "Users can view own profile" ON users
-  FOR SELECT USING (auth.uid() = id);
 
 CREATE POLICY "Users can view own settings" ON user_settings
   FOR SELECT USING (auth.uid() = user_id);
@@ -83,22 +74,8 @@ CREATE POLICY "Users can view holidays" ON holidays
 CREATE POLICY "Users can manage own holidays" ON holidays
   FOR ALL USING (auth.uid() = user_id);
 
--- Trigger: criar user público ao registrar via Auth
+-- Trigger: criar settings padrão ao registrar via Auth
 CREATE OR REPLACE FUNCTION public.handle_new_user()
-RETURNS TRIGGER AS $$
-BEGIN
-  INSERT INTO public.users (id, email)
-  VALUES (NEW.id, NEW.email);
-  RETURN NEW;
-END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
-
-CREATE TRIGGER on_auth_user_created
-  AFTER INSERT ON auth.users
-  FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
-
--- Trigger: criar settings padrão ao criar user
-CREATE OR REPLACE FUNCTION public.handle_new_user_settings()
 RETURNS TRIGGER AS $$
 BEGIN
   INSERT INTO public.user_settings (user_id)
@@ -107,9 +84,9 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
-CREATE TRIGGER on_user_created
-  AFTER INSERT ON public.users
-  FOR EACH ROW EXECUTE FUNCTION public.handle_new_user_settings();
+CREATE TRIGGER on_auth_user_created
+  AFTER INSERT ON auth.users
+  FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
 
 -- Trigger: atualizar updated_at automaticamente
 CREATE OR REPLACE FUNCTION public.update_updated_at()

@@ -1,14 +1,8 @@
 import { pgTable, uuid, varchar, timestamp, time, date, jsonb, boolean, integer, text } from 'drizzle-orm/pg-core';
 
-export const users = pgTable('users', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  email: varchar('email', { length: 255 }).unique().notNull(),
-  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
-});
-
 export const userSettings = pgTable('user_settings', {
   id: uuid('id').primaryKey().defaultRandom(),
-  userId: uuid('user_id').references(() => users.id, { onDelete: 'cascade' }).unique().notNull(),
+  userId: uuid('user_id').unique().notNull(),
   workHoursStart: time('work_hours_start').default('08:00:00').notNull(),
   workHoursEnd: time('work_hours_end').default('17:00:00').notNull(),
   lunchBreakStart: time('lunch_break_start').default('12:00:00').notNull(),
@@ -24,7 +18,7 @@ export const userSettings = pgTable('user_settings', {
 
 export const timeEntries = pgTable('time_entries', {
   id: uuid('id').primaryKey().defaultRandom(),
-  userId: uuid('user_id').references(() => users.id, { onDelete: 'cascade' }).notNull(),
+  userId: uuid('user_id').notNull(),
   date: date('date').notNull(),
   entry1: timestamp('entry_1', { withTimezone: true }),
   exit1: timestamp('exit_1', { withTimezone: true }),
@@ -39,7 +33,7 @@ export const timeEntries = pgTable('time_entries', {
 
 export const holidays = pgTable('holidays', {
   id: uuid('id').primaryKey().defaultRandom(),
-  userId: uuid('user_id').references(() => users.id, { onDelete: 'cascade' }),
+  userId: uuid('user_id'),
   date: date('date').notNull(),
   name: varchar('name', { length: 255 }).notNull(),
   isNational: boolean('is_national').default(false).notNull(),
