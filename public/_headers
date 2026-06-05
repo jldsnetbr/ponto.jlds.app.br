@@ -1,6 +1,11 @@
-/assets/*
+# Assets: force correct MIME types for JS (Cloudflare sometimes serves .js as application/octet-stream)
+/assets/*.js
   Content-Type: text/javascript
 
+/assets/*.css
+  Content-Type: text/css
+
+# Service worker
 /sw.js
   Content-Type: text/javascript
 
