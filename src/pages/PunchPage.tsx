@@ -4,7 +4,7 @@ import 'dayjs/locale/pt-br';
 import { useTodayEntry } from '@/hooks/useTimeEntries';
 import { usePunch, useDeletePunch, useUpdateSinglePunch } from '@/hooks/usePunchMutations';
 import { useSettings } from '@/hooks/useSettings';
-import { getNextPunchType, calculateDay } from '@/lib/calculations';
+import { getNextPunchType, calculateElapsedToday } from '@/lib/calculations';
 import { formatMinutes } from '@/lib/utils';
 import { useToast, Card, Button } from '@/components/ui';
 import { PunchButton } from '@/components/punch/PunchButton';
@@ -39,13 +39,7 @@ export function PunchPage() {
     entry || { entry_1: null, exit_1: null, entry_2: null, exit_2: null }
   );
 
-  const { totalWorkedMinutes } = calculateDay(
-    entry?.entry_1 ? new Date(entry.entry_1) : null,
-    entry?.exit_1 ? new Date(entry.exit_1) : null,
-    entry?.entry_2 ? new Date(entry.entry_2) : null,
-    entry?.exit_2 ? new Date(entry.exit_2) : null,
-    settings?.daily_workload_minutes ?? 480
-  );
+  const totalWorkedMinutes = calculateElapsedToday(entry ?? null, now);
 
   const progress = settings
     ? (totalWorkedMinutes / settings.daily_workload_minutes) * 100

@@ -46,6 +46,27 @@ export function calculateMonthlyBalance(entries: { balance_minutes: number | nul
   }, 0);
 }
 
+export function calculateElapsedToday(
+  entry: { entry_1: string | null; exit_1: string | null; entry_2: string | null; exit_2: string | null } | null,
+  now: dayjs.Dayjs
+): number {
+  if (!entry) return 0;
+
+  let total = 0;
+  const e1 = entry.entry_1 ? dayjs(entry.entry_1) : null;
+  const x1 = entry.exit_1 ? dayjs(entry.exit_1) : null;
+  const e2 = entry.entry_2 ? dayjs(entry.entry_2) : null;
+  const x2 = entry.exit_2 ? dayjs(entry.exit_2) : null;
+
+  if (e1 && x1) total += x1.diff(e1, 'minute');
+  else if (e1) total += now.diff(e1, 'minute');
+
+  if (e2 && x2) total += x2.diff(e2, 'minute');
+  else if (e2) total += now.diff(e2, 'minute');
+
+  return total;
+}
+
 export function calculateWorkloadMinutes(
   workHoursStart: string,
   workHoursEnd: string,
