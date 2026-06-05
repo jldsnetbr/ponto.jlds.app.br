@@ -50,11 +50,13 @@ export function PunchPage() {
     setShowModal(true);
   };
 
-  const handleConfirmPunch = () => {
+  const handleConfirmPunch = (horario: string) => {
     if (!tipoPendente || !proximoTipo) return;
     setShowModal(false);
+    const hoje = dayjs().format('YYYY-MM-DD');
+    const horarioISO = dayjs(`${hoje}T${horario}`).toISOString();
     baterPonto.mutate(
-      { entry: entry || null, tipo: tipoPendente },
+      { entry: entry || null, tipo: tipoPendente, horario: horarioISO },
       {
         onSuccess: () => {
           const labels: Record<string, string> = {
@@ -63,7 +65,7 @@ export function PunchPage() {
             retorno_almoco: 'Retorno Almoço',
             saida_final: 'Saída Final',
           };
-          showToast(`${labels[tipoPendente]} registrada às ${dayjs().format('HH:mm')}`, 'success');
+          showToast(`${labels[tipoPendente]} registrada às ${horario}`, 'success');
         },
         onError: () => {
           showToast('Erro ao registrar ponto', 'error');

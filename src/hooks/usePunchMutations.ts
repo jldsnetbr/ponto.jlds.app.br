@@ -13,8 +13,8 @@ export function useBaterPonto() {
   const hoje = dayjs().format('YYYY-MM-DD');
 
   return useMutation({
-    mutationFn: async ({ entry, tipo }: { entry: RegistroPonto | null; tipo: TipoBatida }) => {
-      const agora = new Date().toISOString();
+    mutationFn: async ({ entry, tipo, horario }: { entry: RegistroPonto | null; tipo: TipoBatida; horario?: string }) => {
+      const agora = horario || new Date().toISOString();
 
       if (!entry) {
         const { data, error } = await supabase

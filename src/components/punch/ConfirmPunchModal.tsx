@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import dayjs from 'dayjs';
 import { Modal, Button } from '@/components/ui';
 import type { TipoBatida } from '@/types';
@@ -5,7 +6,7 @@ import type { TipoBatida } from '@/types';
 interface ConfirmPunchModalProps {
   open: boolean;
   onClose: () => void;
-  onConfirm: () => void;
+  onConfirm: (horario: string) => void;
   tipo: TipoBatida | null;
 }
 
@@ -17,7 +18,11 @@ const labels: Record<TipoBatida, string> = {
 };
 
 export function ConfirmPunchModal({ open, onClose, onConfirm, tipo }: ConfirmPunchModalProps) {
-  const agora = dayjs();
+  const [horario, setHorario] = useState('');
+
+  useEffect(() => {
+    if (open) setHorario(dayjs().format('HH:mm'));
+  }, [open]);
 
   return (
     <Modal open={open} onClose={onClose} title="Confirmar Batida">
@@ -25,17 +30,25 @@ export function ConfirmPunchModal({ open, onClose, onConfirm, tipo }: ConfirmPun
         <p className="text-xl font-bold text-blue-600">
           {tipo ? labels[tipo] : '---'}
         </p>
-        <p className="text-5xl font-mono font-bold text-gray-900">
-          {agora.format('HH:mm:ss')}
-        </p>
+
+        <input
+          type="time"
+          value={horario}
+          onChange={(e) => setHorario(e.target.value)}
+          className="text-5xl font-mono font-bold text-gray-900 text-center bg-transparent border-b-2 border-blue-500 focus:outline-none w-40 py-1"
+          step="1"
+          autoFocus
+        />
+
         <p className="text-sm text-gray-500 capitalize">
-          {agora.format('dddd, DD [de] MMMM [de] YYYY')}
+          {dayjs().format('dddd, DD [de] MMMM [de] YYYY')}
         </p>
+
         <div className="flex gap-3 w-full mt-2">
           <Button variant="secondary" onClick={onClose} fullWidth>
             Cancelar
           </Button>
-          <Button onClick={onConfirm} fullWidth>
+          <Button onClick={() => onConfirm(horario)} fullWidth>
             Confirmar
           </Button>
         </div>
