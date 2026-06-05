@@ -36,9 +36,25 @@ export async function onRequest(context) {
 
   const proxyUrl = new URL(url.pathname + url.search, SUPABASE_ORIGIN);
 
-  return fetch(proxyUrl.toString(), {
-    method: request.method,
-    headers: request.headers,
-    body: request.body,
+  const method = request.method;
+  const headers = new Headers(request.headers);
+  headers.delete('content-length');
+
+  let body = null;
+  if (method !== 'GET' && method !== 'HEAD') {
+    body = await request.text();
+  }
+
+  const response = await fetch(proxyUrl.toString(), {
+    method,
+    headers,
+    body,
   });
+
+  if (!response.ok) {
+    const responseBody = await response.clone().text();
+    console.error('[PROXY ERROR]', response.status, method, url.pathname, responseBody);
+  }
+
+  return response;
 }
