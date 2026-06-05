@@ -35,8 +35,7 @@ export function ConfirmPunchModal({ open, onClose, onConfirm, tipo }: ConfirmPun
           type="time"
           value={horario}
           onChange={(e) => setHorario(e.target.value)}
-          className="text-5xl font-mono font-bold text-gray-900 text-center bg-transparent border-b-2 border-blue-500 focus:outline-none w-40 py-1"
-          step="1"
+          className="text-5xl font-mono font-bold text-gray-900 text-center bg-transparent border-b-2 border-blue-500 focus:outline-none w-52 py-1"
           autoFocus
         />
 
