@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import dayjs from 'dayjs';
 import 'dayjs/locale/pt-br';
-import { useTodayEntry, usePunch, useDeletePunch, useUpdateSinglePunch } from '@/hooks/useTimeEntries';
+import { useTodayEntry } from '@/hooks/useTimeEntries';
+import { usePunch, useDeletePunch, useUpdateSinglePunch } from '@/hooks/usePunchMutations';
 import { useSettings } from '@/hooks/useSettings';
 import { getNextPunchType, calculateDay } from '@/lib/calculations';
 import { formatMinutes } from '@/lib/utils';

@@ -15,11 +15,14 @@ vi.mock('@/hooks/useAuth', () => ({
 
 vi.mock('@/hooks/useTimeEntries', () => ({
   useTodayEntry: () => ({ data: null, isLoading: false }),
-  usePunch: () => ({ mutate: vi.fn(), isPending: false }),
   useTimeEntries: () => ({ data: [], isLoading: false }),
-  useUpdateTimeEntry: () => ({ mutate: vi.fn(), isPending: false }),
+}));
+
+vi.mock('@/hooks/usePunchMutations', () => ({
+  usePunch: () => ({ mutate: vi.fn(), isPending: false }),
   useDeletePunch: () => ({ mutate: vi.fn(), isPending: false }),
   useUpdateSinglePunch: () => ({ mutate: vi.fn(), isPending: false }),
+  useUpdateTimeEntry: () => ({ mutate: vi.fn(), isPending: false }),
 }));
 
 vi.mock('@/hooks/useSettings', () => ({

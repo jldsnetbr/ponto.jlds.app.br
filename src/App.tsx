@@ -7,12 +7,14 @@ import { BankPage } from '@/pages/BankPage';
 import { HistoryPage } from '@/pages/HistoryPage';
 import { SettingsPage } from '@/pages/SettingsPage';
 import { useNotifications } from '@/hooks/useNotifications';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
 
 export default function App() {
   useNotifications();
 
   return (
-    <BrowserRouter>
+    <ErrorBoundary>
+      <BrowserRouter>
       <Routes>
         <Route path="/login" element={<AuthPage />} />
         <Route
@@ -30,5 +32,6 @@ export default function App() {
         </Route>
       </Routes>
     </BrowserRouter>
+    </ErrorBoundary>
   );
 }

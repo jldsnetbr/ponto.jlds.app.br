@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import dayjs from 'dayjs';
-import { useTimeEntries, useUpdateTimeEntry } from '@/hooks/useTimeEntries';
+import { useTimeEntries } from '@/hooks/useTimeEntries';
+import { useUpdateTimeEntry } from '@/hooks/usePunchMutations';
 import { calculateDay } from '@/lib/calculations';
 import { formatMinutes, cn } from '@/lib/utils';
 import { useSettings } from '@/hooks/useSettings';
