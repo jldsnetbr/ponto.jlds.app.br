@@ -1,15 +1,17 @@
 import { useEffect, useState } from 'react';
 import dayjs from 'dayjs';
 import 'dayjs/locale/pt-br';
-import { useTodayEntry, usePunch } from '@/hooks/useTimeEntries';
+import { useTodayEntry, usePunch, useDeletePunch, useUpdateSinglePunch } from '@/hooks/useTimeEntries';
 import { useSettings } from '@/hooks/useSettings';
 import { getNextPunchType, calculateDay } from '@/lib/calculations';
 import { formatMinutes } from '@/lib/utils';
-import { useToast } from '@/components/ui';
+import { useToast, Card, Button } from '@/components/ui';
 import { PunchButton } from '@/components/punch/PunchButton';
 import { TodayStatus } from '@/components/punch/TodayStatus';
 import { ProgressBar } from '@/components/punch/ProgressBar';
-import { Card } from '@/components/ui';
+import { ConfirmPunchModal } from '@/components/punch/ConfirmPunchModal';
+import { Modal } from '@/components/ui/Modal';
+import type { PunchType } from '@/types';
 
 dayjs.locale('pt-br');
 
@@ -17,8 +19,15 @@ export function PunchPage() {
   const { data: entry, isLoading } = useTodayEntry();
   const { data: settings } = useSettings();
   const punchMutation = usePunch();
+  const deletePunchMutation = useDeletePunch();
+  const updateSinglePunchMutation = useUpdateSinglePunch();
   const { showToast } = useToast();
   const [now, setNow] = useState(dayjs());
+
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [pendingPunchType, setPendingPunchType] = useState<PunchType | null>(null);
+
+  const [deleteConfirm, setDeleteConfirm] = useState<{ id: string; punchType: PunchType } | null>(null);
 
   useEffect(() => {
     const timer = setInterval(() => setNow(dayjs()), 1000);
@@ -41,10 +50,17 @@ export function PunchPage() {
     ? (totalWorkedMinutes / settings.daily_workload_minutes) * 100
     : 0;
 
-  const handlePunch = () => {
+  const handlePunchClick = () => {
     if (!nextPunchType) return;
+    setPendingPunchType(nextPunchType);
+    setShowConfirmModal(true);
+  };
+
+  const handleConfirmPunch = () => {
+    if (!pendingPunchType || !nextPunchType) return;
+    setShowConfirmModal(false);
     punchMutation.mutate(
-      { entry: entry || null, punchType: nextPunchType },
+      { entry: entry || null, punchType: pendingPunchType },
       {
         onSuccess: () => {
           const labels: Record<string, string> = {
@@ -53,14 +69,57 @@ export function PunchPage() {
             entry_2: 'Retorno Almoço',
             exit_2: 'Saída Final',
           };
-          showToast(`${labels[nextPunchType]} registrada às ${dayjs().format('HH:mm')}`, 'success');
+          showToast(`${labels[pendingPunchType]} registrada às ${dayjs().format('HH:mm')}`, 'success');
         },
         onError: () => {
           showToast('Erro ao registrar ponto', 'error');
         },
       }
     );
+    setPendingPunchType(null);
   };
+
+  const handleEdit = (id: string, punchType: PunchType, time: string) => {
+    updateSinglePunchMutation.mutate(
+      { id, punchType, time },
+      {
+        onSuccess: () => {
+          showToast('Batida atualizada', 'success');
+        },
+        onError: () => {
+          showToast('Erro ao atualizar batida', 'error');
+        },
+      }
+    );
+  };
+
+  const handleDelete = (id: string, punchType: PunchType) => {
+    setDeleteConfirm({ id, punchType });
+  };
+
+  const handleConfirmDelete = () => {
+    if (!deleteConfirm) return;
+    deletePunchMutation.mutate(
+      { id: deleteConfirm.id, punchType: deleteConfirm.punchType },
+      {
+        onSuccess: () => {
+          const labels: Record<string, string> = {
+            entry_1: 'Entrada',
+            exit_1: 'Saída Almoço',
+            entry_2: 'Retorno Almoço',
+            exit_2: 'Saída Final',
+          };
+          showToast(`${labels[deleteConfirm.punchType]} removida`, 'success');
+        },
+        onError: () => {
+          showToast('Erro ao remover batida', 'error');
+        },
+      }
+    );
+    setDeleteConfirm(null);
+  };
+
+  const isPending = punchMutation.isPending || deletePunchMutation.isPending || updateSinglePunchMutation.isPending;
 
   if (isLoading) {
     return (
@@ -83,8 +142,8 @@ export function PunchPage() {
 
       <PunchButton
         nextPunchType={nextPunchType}
-        onPunch={handlePunch}
-        disabled={punchMutation.isPending}
+        onPunch={handlePunchClick}
+        disabled={isPending}
       />
 
       <div className="w-full max-w-sm">
@@ -99,8 +158,40 @@ export function PunchPage() {
 
       <Card className="w-full max-w-sm">
         <h3 className="text-sm font-semibold text-gray-700 mb-2">Batidas de hoje</h3>
-        <TodayStatus entry={entry || null} />
+        <TodayStatus
+          entry={entry || null}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+          isPending={isPending}
+        />
       </Card>
+
+      <ConfirmPunchModal
+        open={showConfirmModal}
+        onClose={() => { setShowConfirmModal(false); setPendingPunchType(null); }}
+        onConfirm={handleConfirmPunch}
+        punchType={pendingPunchType}
+      />
+
+      <Modal
+        open={deleteConfirm !== null}
+        onClose={() => setDeleteConfirm(null)}
+        title="Remover batida"
+      >
+        <div className="flex flex-col items-center gap-4 py-2">
+          <p className="text-gray-600 text-center">
+            Tem certeza que deseja remover esta batida?
+          </p>
+          <div className="flex gap-3 w-full mt-2">
+            <Button variant="secondary" onClick={() => setDeleteConfirm(null)} fullWidth>
+              Cancelar
+            </Button>
+            <Button variant="danger" onClick={handleConfirmDelete} fullWidth>
+              Remover
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }

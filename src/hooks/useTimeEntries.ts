@@ -3,7 +3,7 @@ import { supabase } from '@/lib/supabase';
 import { useAuth } from './useAuth';
 import { useSettings } from './useSettings';
 import { calculateDay } from '@/lib/calculations';
-import type { TimeEntry, PunchType } from '@/types';
+import type { TimeEntry, PunchType, UserSettings } from '@/types';
 import dayjs from 'dayjs';
 
 export function useTimeEntries(yearMonth?: string) {
@@ -116,23 +116,69 @@ export function useUpdateTimeEntry() {
       return data as TimeEntry;
     },
     onSuccess: (entry) => {
-      if (settings) {
-        const { totalWorkedMinutes, balanceMinutes } = calculateDay(
-          entry.entry_1 ? new Date(entry.entry_1) : null,
-          entry.exit_1 ? new Date(entry.exit_1) : null,
-          entry.entry_2 ? new Date(entry.entry_2) : null,
-          entry.exit_2 ? new Date(entry.exit_2) : null,
-          settings.daily_workload_minutes,
-          settings.tolerance_minutes
-        );
+      recalculateAndInvalidate(entry, settings, queryClient);
+    },
+  });
+}
 
-        supabase
-          .from('time_entries')
-          .update({ total_worked_minutes: totalWorkedMinutes, balance_minutes: balanceMinutes })
-          .eq('id', entry.id);
-      }
+function recalculateAndInvalidate(entry: TimeEntry, settings: UserSettings | undefined, queryClient: ReturnType<typeof useQueryClient>) {
+  if (settings) {
+    const { totalWorkedMinutes, balanceMinutes } = calculateDay(
+      entry.entry_1 ? new Date(entry.entry_1) : null,
+      entry.exit_1 ? new Date(entry.exit_1) : null,
+      entry.entry_2 ? new Date(entry.entry_2) : null,
+      entry.exit_2 ? new Date(entry.exit_2) : null,
+      settings.daily_workload_minutes,
+      settings.tolerance_minutes
+    );
 
-      queryClient.invalidateQueries({ queryKey: ['timeEntries'] });
+    supabase
+      .from('time_entries')
+      .update({ total_worked_minutes: totalWorkedMinutes, balance_minutes: balanceMinutes })
+      .eq('id', entry.id);
+  }
+
+  queryClient.invalidateQueries({ queryKey: ['timeEntries'] });
+}
+
+export function useDeletePunch() {
+  const queryClient = useQueryClient();
+  const { data: settings } = useSettings();
+
+  return useMutation({
+    mutationFn: async ({ id, punchType }: { id: string; punchType: PunchType }) => {
+      const { data, error } = await supabase
+        .from('time_entries')
+        .update({ [punchType]: null })
+        .eq('id', id)
+        .select()
+        .single();
+      if (error) throw error;
+      return data as TimeEntry;
+    },
+    onSuccess: (entry) => {
+      recalculateAndInvalidate(entry, settings, queryClient);
+    },
+  });
+}
+
+export function useUpdateSinglePunch() {
+  const queryClient = useQueryClient();
+  const { data: settings } = useSettings();
+
+  return useMutation({
+    mutationFn: async ({ id, punchType, time }: { id: string; punchType: PunchType; time: string }) => {
+      const { data, error } = await supabase
+        .from('time_entries')
+        .update({ [punchType]: time })
+        .eq('id', id)
+        .select()
+        .single();
+      if (error) throw error;
+      return data as TimeEntry;
+    },
+    onSuccess: (entry) => {
+      recalculateAndInvalidate(entry, settings, queryClient);
     },
   });
 }
