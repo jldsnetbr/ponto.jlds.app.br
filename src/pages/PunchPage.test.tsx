@@ -20,9 +20,7 @@ vi.mock('@/hooks/useTimeEntries', () => ({
 
 vi.mock('@/hooks/usePunchMutations', () => ({
   useBaterPonto: () => ({ mutate: vi.fn(), isPending: false }),
-  useRemoverBatida: () => ({ mutate: vi.fn(), isPending: false }),
-  useAtualizarBatida: () => ({ mutate: vi.fn(), isPending: false }),
-  useAtualizarRegistroPonto: () => ({ mutate: vi.fn(), isPending: false }),
+  useAlterarPonto: () => ({ mutate: vi.fn(), isPending: false }),
 }));
 
 vi.mock('@/hooks/useSettings', () => ({
@@ -38,7 +36,6 @@ vi.mock('@/hooks/useSettings', () => ({
       notificacoes_ativas: false,
       notificacao_horario: '07:30:00',
       jornada_minutos: 480,
-      tolerancia_minutos: 5,
     },
     isLoading: false,
   }),

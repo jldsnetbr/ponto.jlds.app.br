@@ -10,8 +10,7 @@ export async function recalcularESalvar(entry: RegistroPonto, config: Configurac
     entry.saida_almoco ? new Date(entry.saida_almoco) : null,
     entry.retorno_almoco ? new Date(entry.retorno_almoco) : null,
     entry.saida_final ? new Date(entry.saida_final) : null,
-    config.jornada_minutos,
-    config.tolerancia_minutos
+    config.jornada_minutos
   );
 
   const { error } = await supabase

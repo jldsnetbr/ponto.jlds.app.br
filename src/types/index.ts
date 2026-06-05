@@ -15,7 +15,6 @@ export interface ConfiguracoesUsuario {
   notificacoes_ativas: boolean;
   notificacao_horario: string;
   jornada_minutos: number;
-  tolerancia_minutos: number;
 }
 
 export interface RegistroPonto {

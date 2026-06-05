@@ -4,7 +4,7 @@ import dayjs from 'dayjs';
 import { useRegistrosPonto } from '@/hooks/useTimeEntries';
 import { calcularSaldoMensal } from '@/lib/calculations';
 import { formatarMinutos, cn } from '@/lib/utils';
-import { Card } from '@/components/ui';
+import { Card, Spinner } from '@/components/ui';
 
 const diasSemana = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
 
@@ -48,11 +48,7 @@ export function BankPage() {
         </p>
       </Card>
 
-      {isLoading ? (
-        <div className="flex justify-center p-8">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500" />
-        </div>
-      ) : (
+      {isLoading ? <Spinner /> : (
         <div className="flex flex-col gap-2">
           {dias.map((dia) => {
             const saldo = dia.entry?.saldo_minutos;
@@ -60,9 +56,9 @@ export function BankPage() {
             const saldoZero = saldo !== null && saldo !== undefined && Math.abs(saldo) <= 5;
 
             return (
-              <Card
-                key={dia.data}
-                onClick={() => { if (dia.entry) navigate('/history'); }}
+                <Card
+                  key={dia.data}
+                  onClick={() => { if (dia.entry) navigate(`/history?dia=${dia.data}`); }}
                 className={cn('flex items-center justify-between py-3', !dia.entry && 'opacity-50')}
               >
                 <div className="flex items-center gap-3">

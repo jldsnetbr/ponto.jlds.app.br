@@ -6,12 +6,9 @@ import { PunchPage } from '@/pages/PunchPage';
 import { BankPage } from '@/pages/BankPage';
 import { HistoryPage } from '@/pages/HistoryPage';
 import { SettingsPage } from '@/pages/SettingsPage';
-import { useNotificacoes } from '@/hooks/useNotifications';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 
 export default function App() {
-  useNotificacoes();
-
   return (
     <ErrorBoundary>
       <BrowserRouter>

@@ -1,21 +1,23 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import dayjs from 'dayjs';
 import { useRegistrosPonto } from '@/hooks/useTimeEntries';
-import { useAtualizarRegistroPonto } from '@/hooks/usePunchMutations';
+import { useAlterarPonto } from '@/hooks/usePunchMutations';
 import { calcularDia } from '@/lib/calculations';
 import { formatarMinutos, cn } from '@/lib/utils';
 import { useConfiguracoes } from '@/hooks/useSettings';
-import { useToast } from '@/components/ui';
-import { Card, Button, Input } from '@/components/ui';
+import { useToast, Card, Button, Input, Spinner } from '@/components/ui';
 import type { RegistroPonto } from '@/types';
 
 const diasSemana = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
 
 export function HistoryPage() {
-  const [anoMes, setAnoMes] = useState(dayjs().format('YYYY-MM'));
+  const [searchParams] = useSearchParams();
+  const diaParam = searchParams.get('dia');
+  const [anoMes, setAnoMes] = useState(() => diaParam ? dayjs(diaParam).format('YYYY-MM') : dayjs().format('YYYY-MM'));
   const { data: entries, isLoading } = useRegistrosPonto(anoMes);
   const { data: config } = useConfiguracoes();
-  const mutation = useAtualizarRegistroPonto();
+  const mutation = useAlterarPonto();
   const { showToast } = useToast();
   const [expandido, setExpandido] = useState<string | null>(null);
   const [editValues, setEditValues] = useState<Record<string, string>>({});
@@ -25,8 +27,7 @@ export function HistoryPage() {
   const mesSeguinte = () => { setAnoMes(dayjs(anoMes, 'YYYY-MM').add(1, 'month').format('YYYY-MM')); setExpandido(null); };
   const labelMes = dayjs(anoMes, 'YYYY-MM').format('MMMM [de] YYYY');
 
-  const handleExpandir = (entry: RegistroPonto) => {
-    if (expandido === entry.data) { setExpandido(null); return; }
+  const expandirEntry = (entry: RegistroPonto) => {
     setExpandido(entry.data);
     setEditValues({
       entrada: entry.entrada ? dayjs(entry.entrada).format('HH:mm') : '',
@@ -36,6 +37,18 @@ export function HistoryPage() {
     });
     setEditObs(entry.observacao || '');
   };
+
+  const handleExpandir = (entry: RegistroPonto) => {
+    if (expandido === entry.data) { setExpandido(null); return; }
+    expandirEntry(entry);
+  };
+
+  useEffect(() => {
+    if (diaParam && entries) {
+      const match = entries.find(e => e.data === diaParam);
+      if (match && expandido !== diaParam) expandirEntry(match);
+    }
+  }, [diaParam, entries]);
 
   const handleSalvar = (entry: RegistroPonto) => {
     const paraISO = (horario: string) => {
@@ -71,8 +84,7 @@ export function HistoryPage() {
       paraData(editValues.saida_almoco),
       paraData(editValues.retorno_almoco),
       paraData(editValues.saida_final),
-      config?.jornada_minutos ?? 480,
-      config?.tolerancia_minutos ?? 5
+      config?.jornada_minutos ?? 480
     );
   };
 
@@ -84,11 +96,7 @@ export function HistoryPage() {
         <button onClick={mesSeguinte} className="min-h-[44px] min-w-[44px] flex items-center justify-center text-gray-600 text-lg" aria-label="Próximo mês">→</button>
       </div>
 
-      {isLoading ? (
-        <div className="flex justify-center p-8">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500" />
-        </div>
-      ) : (
+      {isLoading ? <Spinner /> : (
         <div className="flex flex-col gap-2">
           {(entries || []).map((entry) => {
             const estaExpandido = expandido === entry.data;

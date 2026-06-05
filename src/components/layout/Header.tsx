@@ -18,7 +18,7 @@ export function Header() {
       </button>
       <h1 className="text-lg font-semibold text-gray-900">Controle de Ponto</h1>
       <button
-        onClick={sair}
+        onClick={() => { if (window.confirm('Tem certeza que deseja sair?')) sair(); }}
         className="text-sm text-gray-500 min-h-[44px] min-w-[44px] flex items-center justify-center"
         aria-label="Sair"
       >

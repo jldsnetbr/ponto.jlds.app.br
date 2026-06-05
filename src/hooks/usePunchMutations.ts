@@ -46,7 +46,7 @@ export function useBaterPonto() {
   });
 }
 
-export function useAtualizarRegistroPonto() {
+export function useAlterarPonto() {
   const queryClient = useQueryClient();
   const { data: config } = useConfiguracoes();
 
@@ -55,58 +55,6 @@ export function useAtualizarRegistroPonto() {
       const { data, error } = await supabase
         .from('pontos')
         .update(updates)
-        .eq('id', id)
-        .select()
-        .single();
-      if (error) throw error;
-      return data as RegistroPonto;
-    },
-    onSuccess: async (entry) => {
-      try {
-        await recalcularESalvar(entry, config);
-      } catch (err) {
-        console.error(err);
-      }
-      queryClient.invalidateQueries({ queryKey: ['pontos'] });
-    },
-  });
-}
-
-export function useRemoverBatida() {
-  const queryClient = useQueryClient();
-  const { data: config } = useConfiguracoes();
-
-  return useMutation({
-    mutationFn: async ({ id, tipo }: { id: string; tipo: TipoBatida }) => {
-      const { data, error } = await supabase
-        .from('pontos')
-        .update({ [tipo]: null })
-        .eq('id', id)
-        .select()
-        .single();
-      if (error) throw error;
-      return data as RegistroPonto;
-    },
-    onSuccess: async (entry) => {
-      try {
-        await recalcularESalvar(entry, config);
-      } catch (err) {
-        console.error(err);
-      }
-      queryClient.invalidateQueries({ queryKey: ['pontos'] });
-    },
-  });
-}
-
-export function useAtualizarBatida() {
-  const queryClient = useQueryClient();
-  const { data: config } = useConfiguracoes();
-
-  return useMutation({
-    mutationFn: async ({ id, tipo, horario }: { id: string; tipo: TipoBatida; horario: string }) => {
-      const { data, error } = await supabase
-        .from('pontos')
-        .update({ [tipo]: horario })
         .eq('id', id)
         .select()
         .single();

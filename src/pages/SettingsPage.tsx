@@ -3,7 +3,7 @@ import dayjs from 'dayjs';
 import { useConfiguracoes, useAtualizarConfiguracoes } from '@/hooks/useSettings';
 import { useFeriados, useAdicionarFeriado, useRemoverFeriado } from '@/hooks/useHolidays';
 import { useAuth } from '@/hooks/useAuth';
-import { useToast, Card, Button, Input, TimePicker } from '@/components/ui';
+import { useToast, Card, Button, Input, TimePicker, Spinner } from '@/components/ui';
 import { requestNotificationPermission } from '@/lib/notifications';
 import { calcularJornada } from '@/lib/calculations';
 
@@ -54,7 +54,6 @@ export function SettingsPage() {
         notificacoes_ativas: notificacoesAtivas,
         notificacao_horario: notificacaoHorario,
         jornada_minutos: jornadaMinutos,
-        tolerancia_minutos: 5,
       },
       {
         onSuccess: () => showToast('Configurações salvas', 'success'),
@@ -91,13 +90,7 @@ export function SettingsPage() {
   const feriadosPessoais = (feriados || []).filter((h) => h.usuario_id !== null);
   const feriadosNacionais = (feriados || []).filter((h) => h.usuario_id === null);
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center p-8">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500" />
-      </div>
-    );
-  }
+  if (isLoading) return <Spinner />;
 
   return (
     <div className="flex flex-col gap-6 p-4 pb-8">

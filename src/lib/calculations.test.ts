@@ -43,7 +43,7 @@ describe('calcularDia', () => {
     const saidaAlmoco = new Date('2026-06-03T12:00:00');
     const retornoAlmoco = new Date('2026-06-03T13:00:00');
     const saidaFinal = new Date('2026-06-03T17:00:00');
-    const result = calcularDia(entrada, saidaAlmoco, retornoAlmoco, saidaFinal, 480, 5);
+    const result = calcularDia(entrada, saidaAlmoco, retornoAlmoco, saidaFinal, 480);
     expect(result.totalMinutos).toBe(477);
     expect(result.saldoMinutos).toBe(0);
   });

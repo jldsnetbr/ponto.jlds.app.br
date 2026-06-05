@@ -1,13 +1,14 @@
 import dayjs from 'dayjs';
 import type { TipoBatida } from '@/types';
 
+const TOLERANCIA = 5;
+
 export function calcularDia(
   entrada: Date | null,
   saidaAlmoco: Date | null,
   retornoAlmoco: Date | null,
   saidaFinal: Date | null,
-  jornadaMinutos: number,
-  toleranciaMinutos: number = 5
+  jornadaMinutos: number
 ): { totalMinutos: number; saldoMinutos: number } {
   const periodo1 = (entrada && saidaAlmoco)
     ? dayjs(saidaAlmoco).diff(dayjs(entrada), 'minute')
@@ -20,7 +21,7 @@ export function calcularDia(
   const totalMinutos = periodo1 + periodo2;
   let saldoMinutos = totalMinutos - jornadaMinutos;
 
-  if (Math.abs(saldoMinutos) <= toleranciaMinutos) {
+  if (Math.abs(saldoMinutos) <= TOLERANCIA) {
     saldoMinutos = 0;
   }
 

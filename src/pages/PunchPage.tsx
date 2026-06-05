@@ -2,11 +2,11 @@ import { useEffect, useState } from 'react';
 import dayjs from 'dayjs';
 import 'dayjs/locale/pt-br';
 import { useRegistroHoje } from '@/hooks/useTimeEntries';
-import { useBaterPonto, useRemoverBatida, useAtualizarBatida } from '@/hooks/usePunchMutations';
+import { useBaterPonto, useAlterarPonto } from '@/hooks/usePunchMutations';
 import { useConfiguracoes } from '@/hooks/useSettings';
 import { proximoTipoBatida, calcularTempoDecorrido } from '@/lib/calculations';
 import { formatarMinutos } from '@/lib/utils';
-import { useToast, Card, Button } from '@/components/ui';
+import { useToast, Card, Button, Spinner } from '@/components/ui';
 import { PunchButton } from '@/components/punch/PunchButton';
 import { TodayStatus } from '@/components/punch/TodayStatus';
 import { ProgressBar } from '@/components/punch/ProgressBar';
@@ -20,8 +20,7 @@ export function PunchPage() {
   const { data: entry, isLoading } = useRegistroHoje();
   const { data: config } = useConfiguracoes();
   const baterPonto = useBaterPonto();
-  const removerBatida = useRemoverBatida();
-  const atualizarBatida = useAtualizarBatida();
+  const alterarPonto = useAlterarPonto();
   const { showToast } = useToast();
   const [agora, setAgora] = useState(dayjs());
 
@@ -76,8 +75,8 @@ export function PunchPage() {
   };
 
   const handleEdit = (id: string, tipo: TipoBatida, horario: string) => {
-    atualizarBatida.mutate(
-      { id, tipo, horario },
+    alterarPonto.mutate(
+      { id, updates: { [tipo]: horario } },
       {
         onSuccess: () => showToast('Batida atualizada', 'success'),
         onError: () => showToast('Erro ao atualizar batida', 'error'),
@@ -91,8 +90,8 @@ export function PunchPage() {
 
   const handleConfirmDelete = () => {
     if (!deleteConfirm) return;
-    removerBatida.mutate(
-      { id: deleteConfirm.id, tipo: deleteConfirm.tipo },
+    alterarPonto.mutate(
+      { id: deleteConfirm.id, updates: { [deleteConfirm.tipo]: null } },
       {
         onSuccess: () => {
           const labels: Record<string, string> = {
@@ -109,15 +108,9 @@ export function PunchPage() {
     setDeleteConfirm(null);
   };
 
-  const isPending = baterPonto.isPending || removerBatida.isPending || atualizarBatida.isPending;
+  const isPending = baterPonto.isPending || alterarPonto.isPending;
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center p-8">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500" />
-      </div>
-    );
-  }
+  if (isLoading) return <Spinner />;
 
   return (
     <div className="flex flex-col items-center gap-6 p-4">
