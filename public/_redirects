@@ -1,4 +1,4 @@
-/auth/v1/*  /auth/v1/:splat  200
-/rest/v1/*  /rest/v1/:splat  200
-/storage/v1/*  /storage/v1/:splat  200
+/auth/v1/*  /auth/v1/:splat  202
+/rest/v1/*  /rest/v1/:splat  202
+/storage/v1/*  /storage/v1/:splat  202
 /*  /index.html  200
