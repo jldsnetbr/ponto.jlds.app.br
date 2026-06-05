@@ -58,19 +58,19 @@ CREATE POLICY "Usuario ve suas configuracoes" ON configuracoes
   FOR SELECT USING (auth.uid() = usuario_id);
 
 CREATE POLICY "Usuario gerencia suas configuracoes" ON configuracoes
-  FOR ALL USING (auth.uid() = usuario_id);
+  FOR ALL USING (auth.uid() = usuario_id) WITH CHECK (auth.uid() = usuario_id);
 
 CREATE POLICY "Usuario ve seus pontos" ON pontos
   FOR SELECT USING (auth.uid() = usuario_id);
 
 CREATE POLICY "Usuario gerencia seus pontos" ON pontos
-  FOR ALL USING (auth.uid() = usuario_id);
+  FOR ALL USING (auth.uid() = usuario_id) WITH CHECK (auth.uid() = usuario_id);
 
 CREATE POLICY "Usuario ve feriados" ON feriados
   FOR SELECT USING (auth.uid() = usuario_id OR usuario_id IS NULL);
 
 CREATE POLICY "Usuario gerencia seus feriados" ON feriados
-  FOR ALL USING (auth.uid() = usuario_id);
+  FOR ALL USING (auth.uid() = usuario_id) WITH CHECK (auth.uid() = usuario_id);
 
 -- Trigger: criar config padrao ao registrar
 CREATE OR REPLACE FUNCTION public.criar_config_padrao()
