@@ -1,0 +1,14 @@
+/*
+  X-Robots-Tag: noindex
+
+/assets/*.js
+  Content-Type: application/javascript
+
+/assets/*.css
+  Content-Type: text/css
+
+/sw.js
+  Content-Type: application/javascript
+
+/registerSW.js
+  Content-Type: application/javascript
