@@ -5,46 +5,44 @@ import { AllTheProviders } from '@/test/test-utils';
 
 vi.mock('@/hooks/useAuth', () => ({
   useAuth: () => ({
-    user: { id: 'test-uid', email: 'user@email.com', created_at: '2026-01-01T00:00:00Z' },
-    loading: false,
-    signIn: vi.fn(),
-    signUp: vi.fn(),
-    signOut: vi.fn(),
+    usuario: { id: 'test-uid', email: 'user@email.com', criado_em: '2026-01-01T00:00:00Z' },
+    carregando: false,
+    entrar: vi.fn(),
+    cadastrar: vi.fn(),
+    sair: vi.fn(),
   }),
 }));
 
 vi.mock('@/hooks/useTimeEntries', () => ({
-  useTodayEntry: () => ({ data: null, isLoading: false }),
-  useTimeEntries: () => ({ data: [], isLoading: false }),
+  useRegistroHoje: () => ({ data: null, isLoading: false }),
+  useRegistrosPonto: () => ({ data: [], isLoading: false }),
 }));
 
 vi.mock('@/hooks/usePunchMutations', () => ({
-  usePunch: () => ({ mutate: vi.fn(), isPending: false }),
-  useDeletePunch: () => ({ mutate: vi.fn(), isPending: false }),
-  useUpdateSinglePunch: () => ({ mutate: vi.fn(), isPending: false }),
-  useUpdateTimeEntry: () => ({ mutate: vi.fn(), isPending: false }),
+  useBaterPonto: () => ({ mutate: vi.fn(), isPending: false }),
+  useRemoverBatida: () => ({ mutate: vi.fn(), isPending: false }),
+  useAtualizarBatida: () => ({ mutate: vi.fn(), isPending: false }),
+  useAtualizarRegistroPonto: () => ({ mutate: vi.fn(), isPending: false }),
 }));
 
 vi.mock('@/hooks/useSettings', () => ({
-  useSettings: () => ({
+  useConfiguracoes: () => ({
     data: {
       id: 'settings-1',
-      user_id: 'test-uid',
-      work_hours_start: '08:00:00',
-      work_hours_end: '17:00:00',
-      lunch_break_start: '12:00:00',
-      lunch_break_end: '13:00:00',
-      work_days: [1, 2, 3, 4, 5],
-      notifications_enabled: false,
-      notification_time: '07:30:00',
-      daily_workload_minutes: 480,
-      tolerance_minutes: 5,
-      created_at: '2026-01-01T00:00:00Z',
-      updated_at: '2026-01-01T00:00:00Z',
+      usuario_id: 'test-uid',
+      inicio_expediente: '08:00:00',
+      fim_expediente: '17:00:00',
+      almoco_inicio: '12:00:00',
+      almoco_fim: '13:00:00',
+      dias_trabalho: [1, 2, 3, 4, 5],
+      notificacoes_ativas: false,
+      notificacao_horario: '07:30:00',
+      jornada_minutos: 480,
+      tolerancia_minutos: 5,
     },
     isLoading: false,
   }),
-  useUpdateSettings: () => ({ mutate: vi.fn(), isPending: false }),
+  useAtualizarConfiguracoes: () => ({ mutate: vi.fn(), isPending: false }),
 }));
 
 describe('PunchPage', () => {

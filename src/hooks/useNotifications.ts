@@ -1,17 +1,17 @@
 import { useEffect } from 'react';
-import { useSettings } from './useSettings';
+import { useConfiguracoes } from './useSettings';
 import { scheduleNotification, clearNotification } from '@/lib/notifications';
 
-export function useNotifications() {
-  const { data: settings } = useSettings();
+export function useNotificacoes() {
+  const { data: config } = useConfiguracoes();
 
   useEffect(() => {
-    if (settings) {
-      scheduleNotification(settings.notification_time, settings.notifications_enabled);
+    if (config) {
+      scheduleNotification(config.notificacao_horario, config.notificacoes_ativas);
     }
 
     return () => {
       clearNotification();
     };
-  }, [settings?.notification_time, settings?.notifications_enabled]);
+  }, [config?.notificacao_horario, config?.notificacoes_ativas]);
 }

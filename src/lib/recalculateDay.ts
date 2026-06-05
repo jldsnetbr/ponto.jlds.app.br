@@ -1,22 +1,22 @@
 import { supabase } from './supabase';
-import { calculateDay } from './calculations';
-import type { TimeEntry, UserSettings } from '@/types';
+import { calcularDia } from './calculations';
+import type { RegistroPonto, ConfiguracoesUsuario } from '@/types';
 
-export async function recalculateAndSave(entry: TimeEntry, settings: UserSettings | undefined): Promise<void> {
-  if (!settings) return;
+export async function recalcularESalvar(entry: RegistroPonto, config: ConfiguracoesUsuario | undefined): Promise<void> {
+  if (!config) return;
 
-  const { totalWorkedMinutes, balanceMinutes } = calculateDay(
-    entry.entry_1 ? new Date(entry.entry_1) : null,
-    entry.exit_1 ? new Date(entry.exit_1) : null,
-    entry.entry_2 ? new Date(entry.entry_2) : null,
-    entry.exit_2 ? new Date(entry.exit_2) : null,
-    settings.daily_workload_minutes,
-    settings.tolerance_minutes
+  const { totalMinutos, saldoMinutos } = calcularDia(
+    entry.entrada ? new Date(entry.entrada) : null,
+    entry.saida_almoco ? new Date(entry.saida_almoco) : null,
+    entry.retorno_almoco ? new Date(entry.retorno_almoco) : null,
+    entry.saida_final ? new Date(entry.saida_final) : null,
+    config.jornada_minutos,
+    config.tolerancia_minutos
   );
 
   const { error } = await supabase
-    .from('time_entries')
-    .update({ total_worked_minutes: totalWorkedMinutes, balance_minutes: balanceMinutes })
+    .from('pontos')
+    .update({ total_minutos: totalMinutos, saldo_minutos: saldoMinutos })
     .eq('id', entry.id);
 
   if (error) {

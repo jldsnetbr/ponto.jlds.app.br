@@ -1,106 +1,104 @@
 -- ========================================
--- Migration: Schema inicial (sem tabela users)
--- Usa auth.users do Supabase Auth diretamente
+-- Migration: Schema inicial pt-BR
 -- Execute no Supabase SQL Editor
 -- ========================================
 
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
--- Tabela: user_settings
--- FK diretamente para auth.users (built-in do Supabase Auth)
-CREATE TABLE user_settings (
+-- Configuracoes do usuario
+CREATE TABLE configuracoes (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE UNIQUE,
-  work_hours_start TIME NOT NULL DEFAULT '08:00:00',
-  work_hours_end TIME NOT NULL DEFAULT '17:00:00',
-  lunch_break_start TIME NOT NULL DEFAULT '12:00:00',
-  lunch_break_end TIME NOT NULL DEFAULT '13:00:00',
-  work_days JSONB NOT NULL DEFAULT '[1,2,3,4,5]',
-  notifications_enabled BOOLEAN NOT NULL DEFAULT false,
-  notification_time TIME NOT NULL DEFAULT '07:30:00',
-  daily_workload_minutes INTEGER NOT NULL DEFAULT 480,
-  tolerance_minutes INTEGER NOT NULL DEFAULT 5,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+  usuario_id UUID REFERENCES auth.users(id) ON DELETE CASCADE UNIQUE,
+  inicio_expediente TIME NOT NULL DEFAULT '08:00:00',
+  fim_expediente TIME NOT NULL DEFAULT '17:00:00',
+  almoco_inicio TIME NOT NULL DEFAULT '12:00:00',
+  almoco_fim TIME NOT NULL DEFAULT '13:00:00',
+  dias_trabalho JSONB NOT NULL DEFAULT '[1,2,3,4,5]',
+  notificacoes_ativas BOOLEAN NOT NULL DEFAULT false,
+  notificacao_horario TIME NOT NULL DEFAULT '07:30:00',
+  jornada_minutos INTEGER NOT NULL DEFAULT 480,
+  tolerancia_minutos INTEGER NOT NULL DEFAULT 5,
+  criado_em TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  atualizado_em TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Tabela: time_entries
-CREATE TABLE time_entries (
+-- Registros de ponto
+CREATE TABLE pontos (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
-  date DATE NOT NULL,
-  entry_1 TIMESTAMP WITH TIME ZONE,
-  exit_1 TIMESTAMP WITH TIME ZONE,
-  entry_2 TIMESTAMP WITH TIME ZONE,
-  exit_2 TIMESTAMP WITH TIME ZONE,
-  total_worked_minutes INTEGER,
-  balance_minutes INTEGER,
-  notes TEXT,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  UNIQUE(user_id, date)
+  usuario_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+  data DATE NOT NULL,
+  entrada TIMESTAMP WITH TIME ZONE,
+  saida_almoco TIMESTAMP WITH TIME ZONE,
+  retorno_almoco TIMESTAMP WITH TIME ZONE,
+  saida_final TIMESTAMP WITH TIME ZONE,
+  total_minutos INTEGER,
+  saldo_minutos INTEGER,
+  observacao TEXT,
+  criado_em TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  atualizado_em TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  UNIQUE(usuario_id, data)
 );
 
--- Tabela: holidays
-CREATE TABLE holidays (
+-- Feriados
+CREATE TABLE feriados (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
-  date DATE NOT NULL,
-  name VARCHAR(255) NOT NULL,
-  is_national BOOLEAN NOT NULL DEFAULT false,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+  usuario_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+  data DATE NOT NULL,
+  nome VARCHAR(255) NOT NULL,
+  nacional BOOLEAN NOT NULL DEFAULT false,
+  criado_em TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
 -- RLS
-ALTER TABLE user_settings ENABLE ROW LEVEL SECURITY;
-ALTER TABLE time_entries ENABLE ROW LEVEL SECURITY;
-ALTER TABLE holidays ENABLE ROW LEVEL SECURITY;
+ALTER TABLE configuracoes ENABLE ROW LEVEL SECURITY;
+ALTER TABLE pontos ENABLE ROW LEVEL SECURITY;
+ALTER TABLE feriados ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Users can view own settings" ON user_settings
-  FOR SELECT USING (auth.uid() = user_id);
+CREATE POLICY "Usuario ve suas configuracoes" ON configuracoes
+  FOR SELECT USING (auth.uid() = usuario_id);
 
-CREATE POLICY "Users can manage own settings" ON user_settings
-  FOR ALL USING (auth.uid() = user_id);
+CREATE POLICY "Usuario gerencia suas configuracoes" ON configuracoes
+  FOR ALL USING (auth.uid() = usuario_id);
 
-CREATE POLICY "Users can view own time entries" ON time_entries
-  FOR SELECT USING (auth.uid() = user_id);
+CREATE POLICY "Usuario ve seus pontos" ON pontos
+  FOR SELECT USING (auth.uid() = usuario_id);
 
-CREATE POLICY "Users can manage own time entries" ON time_entries
-  FOR ALL USING (auth.uid() = user_id);
+CREATE POLICY "Usuario gerencia seus pontos" ON pontos
+  FOR ALL USING (auth.uid() = usuario_id);
 
-CREATE POLICY "Users can view holidays" ON holidays
-  FOR SELECT USING (auth.uid() = user_id OR user_id IS NULL);
+CREATE POLICY "Usuario ve feriados" ON feriados
+  FOR SELECT USING (auth.uid() = usuario_id OR usuario_id IS NULL);
 
-CREATE POLICY "Users can manage own holidays" ON holidays
-  FOR ALL USING (auth.uid() = user_id);
+CREATE POLICY "Usuario gerencia seus feriados" ON feriados
+  FOR ALL USING (auth.uid() = usuario_id);
 
--- Trigger: criar settings padrão ao registrar via Auth
-CREATE OR REPLACE FUNCTION public.handle_new_user()
+-- Trigger: criar config padrao ao registrar
+CREATE OR REPLACE FUNCTION public.criar_config_padrao()
 RETURNS TRIGGER AS $$
 BEGIN
-  INSERT INTO public.user_settings (user_id)
+  INSERT INTO public.configuracoes (usuario_id)
   VALUES (NEW.id);
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
-CREATE TRIGGER on_auth_user_created
+CREATE TRIGGER apos_criar_usuario
   AFTER INSERT ON auth.users
-  FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
+  FOR EACH ROW EXECUTE FUNCTION public.criar_config_padrao();
 
--- Trigger: atualizar updated_at automaticamente
-CREATE OR REPLACE FUNCTION public.update_updated_at()
+-- Trigger: atualizar atualizado_em
+CREATE OR REPLACE FUNCTION public.atualizar_timestamp()
 RETURNS TRIGGER AS $$
 BEGIN
-  NEW.updated_at = NOW();
+  NEW.atualizado_em = NOW();
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE TRIGGER update_user_settings_updated_at
-  BEFORE UPDATE ON user_settings
-  FOR EACH ROW EXECUTE FUNCTION public.update_updated_at();
+CREATE TRIGGER atualizar_config_timestamp
+  BEFORE UPDATE ON configuracoes
+  FOR EACH ROW EXECUTE FUNCTION public.atualizar_timestamp();
 
-CREATE TRIGGER update_time_entries_updated_at
-  BEFORE UPDATE ON time_entries
-  FOR EACH ROW EXECUTE FUNCTION public.update_updated_at();
+CREATE TRIGGER atualizar_pontos_timestamp
+  BEFORE UPDATE ON pontos
+  FOR EACH ROW EXECUTE FUNCTION public.atualizar_timestamp();

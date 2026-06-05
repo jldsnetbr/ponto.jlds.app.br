@@ -1,106 +1,98 @@
 import { useState } from 'react';
 import dayjs from 'dayjs';
-import type { TimeEntry, PunchType } from '@/types';
+import type { RegistroPonto, TipoBatida } from '@/types';
 
 interface TodayStatusProps {
-  entry: TimeEntry | null;
-  onEdit: (id: string, punchType: PunchType, time: string) => void;
-  onDelete: (id: string, punchType: PunchType) => void;
+  entry: RegistroPonto | null;
+  onEdit: (id: string, tipo: TipoBatida, horario: string) => void;
+  onDelete: (id: string, tipo: TipoBatida) => void;
   isPending: boolean;
 }
 
-const punchLabels: Record<string, string> = {
-  entry_1: 'Entrada',
-  exit_1: 'Saída Almoço',
-  entry_2: 'Retorno Almoço',
-  exit_2: 'Saída Final',
+const labels: Record<string, string> = {
+  entrada: 'Entrada',
+  saida_almoco: 'Saída Almoço',
+  retorno_almoco: 'Retorno Almoço',
+  saida_final: 'Saída Final',
 };
 
-const punchOrder: PunchType[] = ['entry_1', 'exit_1', 'entry_2', 'exit_2'];
+const ordem: TipoBatida[] = ['entrada', 'saida_almoco', 'retorno_almoco', 'saida_final'];
 
 export function TodayStatus({ entry, onEdit, onDelete, isPending }: TodayStatusProps) {
-  const [editingKey, setEditingKey] = useState<string | null>(null);
-  const [editingValue, setEditingValue] = useState('');
+  const [editando, setEditando] = useState<string | null>(null);
+  const [editValor, setEditValor] = useState('');
 
   if (!entry) {
     return <p className="text-sm text-gray-500 text-center">Nenhuma batida registrada hoje</p>;
   }
 
-  const punches: { key: PunchType; time: string }[] = [];
-  for (const key of punchOrder) {
-    const time = entry[key];
-    if (time) punches.push({ key, time });
+  const batidas: { tipo: TipoBatida; horario: string }[] = [];
+  for (const tipo of ordem) {
+    const horario = entry[tipo];
+    if (horario) batidas.push({ tipo, horario });
   }
 
-  const startEdit = (key: string, time: string) => {
-    setEditingKey(key);
-    setEditingValue(dayjs(time).format('HH:mm'));
+  const iniciarEdicao = (tipo: string, horario: string) => {
+    setEditando(tipo);
+    setEditValor(dayjs(horario).format('HH:mm'));
   };
 
-  const cancelEdit = () => {
-    setEditingKey(null);
-    setEditingValue('');
+  const cancelarEdicao = () => {
+    setEditando(null);
+    setEditValor('');
   };
 
-  const confirmEdit = () => {
-    if (!editingKey || !editingValue) return;
-    const date = dayjs(entry.date).format('YYYY-MM-DD');
-    const fullTime = dayjs(`${date}T${editingValue}`).toISOString();
-    onEdit(entry.id, editingKey as PunchType, fullTime);
-    cancelEdit();
+  const confirmarEdicao = () => {
+    if (!editando || !editValor) return;
+    const data = dayjs(entry.data).format('YYYY-MM-DD');
+    const completo = dayjs(`${data}T${editValor}`).toISOString();
+    onEdit(entry.id, editando as TipoBatida, completo);
+    cancelarEdicao();
   };
 
   return (
     <div className="flex flex-col gap-1">
-      {punches.map((punch) => (
-        <div key={punch.key} className="flex items-center justify-between text-sm min-h-[44px]">
-          {editingKey === punch.key ? (
+      {batidas.map((batida) => (
+        <div key={batida.tipo} className="flex items-center justify-between text-sm min-h-[44px]">
+          {editando === batida.tipo ? (
             <div className="flex items-center gap-2 w-full">
               <input
                 type="time"
-                value={editingValue}
-                onChange={(e) => setEditingValue(e.target.value)}
+                value={editValor}
+                onChange={(e) => setEditValor(e.target.value)}
                 className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-base focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[36px]"
                 autoFocus
               />
               <button
-                onClick={confirmEdit}
+                onClick={confirmarEdicao}
                 disabled={isPending}
                 className="text-green-600 font-medium min-h-[36px] min-w-[36px] flex items-center justify-center hover:bg-green-50 rounded-lg"
                 aria-label="Salvar"
-              >
-                ✓
-              </button>
+              >✓</button>
               <button
-                onClick={cancelEdit}
+                onClick={cancelarEdicao}
                 className="text-gray-400 min-h-[36px] min-w-[36px] flex items-center justify-center hover:bg-gray-100 rounded-lg"
                 aria-label="Cancelar"
-              >
-                ✕
-              </button>
+              >✕</button>
             </div>
           ) : (
             <>
-              <span className="text-gray-600">{punchLabels[punch.key]}</span>
+              <span className="text-gray-600">{labels[batida.tipo]}</span>
               <div className="flex items-center gap-1">
                 <span className="font-mono font-medium text-gray-900">
-                  {dayjs(punch.time).format('HH:mm')}
+                  {dayjs(batida.horario).format('HH:mm')}
                 </span>
                 <button
-                  onClick={() => startEdit(punch.key, punch.time)}
+                  onClick={() => iniciarEdicao(batida.tipo, batida.horario)}
                   className="text-gray-400 hover:text-blue-500 min-h-[36px] min-w-[36px] flex items-center justify-center rounded-lg hover:bg-blue-50"
-                  aria-label={`Editar ${punchLabels[punch.key]}`}
-                >
-                  ✎
-                </button>
+                  aria-label={`Editar ${labels[batida.tipo]}`}
+                >✎</button>
                 <button
-                  onClick={() => onDelete(entry.id, punch.key as PunchType)}
+                  onClick={() => onDelete(entry.id, batida.tipo)}
                   disabled={isPending}
                   className="text-gray-400 hover:text-red-500 min-h-[36px] min-w-[36px] flex items-center justify-center rounded-lg hover:bg-red-50 disabled:opacity-30"
-                  aria-label={`Remover ${punchLabels[punch.key]}`}
-                >
-                  🗑
-                </button>
+                  aria-label={`Remover ${labels[batida.tipo]}`}
+                >🗑</button>
               </div>
             </>
           )}

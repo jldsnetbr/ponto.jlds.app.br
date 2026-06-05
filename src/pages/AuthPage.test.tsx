@@ -9,11 +9,11 @@ const mockSignUp = vi.fn();
 
 vi.mock('@/hooks/useAuth', () => ({
   useAuth: () => ({
-    user: null,
-    loading: false,
-    signIn: mockSignIn,
-    signUp: mockSignUp,
-    signOut: vi.fn(),
+    usuario: null,
+    carregando: false,
+    entrar: mockSignIn,
+    cadastrar: mockSignUp,
+    sair: vi.fn(),
   }),
 }));
 

@@ -1,120 +1,113 @@
 import { useEffect, useState } from 'react';
 import dayjs from 'dayjs';
 import 'dayjs/locale/pt-br';
-import { useTodayEntry } from '@/hooks/useTimeEntries';
-import { usePunch, useDeletePunch, useUpdateSinglePunch } from '@/hooks/usePunchMutations';
-import { useSettings } from '@/hooks/useSettings';
-import { getNextPunchType, calculateElapsedToday } from '@/lib/calculations';
-import { formatMinutes } from '@/lib/utils';
+import { useRegistroHoje } from '@/hooks/useTimeEntries';
+import { useBaterPonto, useRemoverBatida, useAtualizarBatida } from '@/hooks/usePunchMutations';
+import { useConfiguracoes } from '@/hooks/useSettings';
+import { proximoTipoBatida, calcularTempoDecorrido } from '@/lib/calculations';
+import { formatarMinutos } from '@/lib/utils';
 import { useToast, Card, Button } from '@/components/ui';
 import { PunchButton } from '@/components/punch/PunchButton';
 import { TodayStatus } from '@/components/punch/TodayStatus';
 import { ProgressBar } from '@/components/punch/ProgressBar';
 import { ConfirmPunchModal } from '@/components/punch/ConfirmPunchModal';
 import { Modal } from '@/components/ui/Modal';
-import type { PunchType } from '@/types';
+import type { TipoBatida } from '@/types';
 
 dayjs.locale('pt-br');
 
 export function PunchPage() {
-  const { data: entry, isLoading } = useTodayEntry();
-  const { data: settings } = useSettings();
-  const punchMutation = usePunch();
-  const deletePunchMutation = useDeletePunch();
-  const updateSinglePunchMutation = useUpdateSinglePunch();
+  const { data: entry, isLoading } = useRegistroHoje();
+  const { data: config } = useConfiguracoes();
+  const baterPonto = useBaterPonto();
+  const removerBatida = useRemoverBatida();
+  const atualizarBatida = useAtualizarBatida();
   const { showToast } = useToast();
-  const [now, setNow] = useState(dayjs());
+  const [agora, setAgora] = useState(dayjs());
 
-  const [showConfirmModal, setShowConfirmModal] = useState(false);
-  const [pendingPunchType, setPendingPunchType] = useState<PunchType | null>(null);
-
-  const [deleteConfirm, setDeleteConfirm] = useState<{ id: string; punchType: PunchType } | null>(null);
+  const [showModal, setShowModal] = useState(false);
+  const [tipoPendente, setTipoPendente] = useState<TipoBatida | null>(null);
+  const [deleteConfirm, setDeleteConfirm] = useState<{ id: string; tipo: TipoBatida } | null>(null);
 
   useEffect(() => {
-    const timer = setInterval(() => setNow(dayjs()), 1000);
+    const timer = setInterval(() => setAgora(dayjs()), 1000);
     return () => clearInterval(timer);
   }, []);
 
-  const nextPunchType = getNextPunchType(
-    entry || { entry_1: null, exit_1: null, entry_2: null, exit_2: null }
+  const proximoTipo = proximoTipoBatida(
+    entry || { entrada: null, saida_almoco: null, retorno_almoco: null, saida_final: null }
   );
 
-  const totalWorkedMinutes = calculateElapsedToday(entry ?? null, now);
+  const totalMinutos = calcularTempoDecorrido(entry ?? null, agora);
 
-  const progress = settings
-    ? (totalWorkedMinutes / settings.daily_workload_minutes) * 100
+  const progresso = config
+    ? (totalMinutos / config.jornada_minutos) * 100
     : 0;
 
   const handlePunchClick = () => {
-    if (!nextPunchType) return;
-    setPendingPunchType(nextPunchType);
-    setShowConfirmModal(true);
+    if (!proximoTipo) return;
+    setTipoPendente(proximoTipo);
+    setShowModal(true);
   };
 
   const handleConfirmPunch = () => {
-    if (!pendingPunchType || !nextPunchType) return;
-    setShowConfirmModal(false);
-    punchMutation.mutate(
-      { entry: entry || null, punchType: pendingPunchType },
+    if (!tipoPendente || !proximoTipo) return;
+    setShowModal(false);
+    baterPonto.mutate(
+      { entry: entry || null, tipo: tipoPendente },
       {
         onSuccess: () => {
           const labels: Record<string, string> = {
-            entry_1: 'Entrada',
-            exit_1: 'Saída Almoço',
-            entry_2: 'Retorno Almoço',
-            exit_2: 'Saída Final',
+            entrada: 'Entrada',
+            saida_almoco: 'Saída Almoço',
+            retorno_almoco: 'Retorno Almoço',
+            saida_final: 'Saída Final',
           };
-          showToast(`${labels[pendingPunchType]} registrada às ${dayjs().format('HH:mm')}`, 'success');
+          showToast(`${labels[tipoPendente]} registrada às ${dayjs().format('HH:mm')}`, 'success');
         },
         onError: () => {
           showToast('Erro ao registrar ponto', 'error');
         },
       }
     );
-    setPendingPunchType(null);
+    setTipoPendente(null);
   };
 
-  const handleEdit = (id: string, punchType: PunchType, time: string) => {
-    updateSinglePunchMutation.mutate(
-      { id, punchType, time },
+  const handleEdit = (id: string, tipo: TipoBatida, horario: string) => {
+    atualizarBatida.mutate(
+      { id, tipo, horario },
       {
-        onSuccess: () => {
-          showToast('Batida atualizada', 'success');
-        },
-        onError: () => {
-          showToast('Erro ao atualizar batida', 'error');
-        },
+        onSuccess: () => showToast('Batida atualizada', 'success'),
+        onError: () => showToast('Erro ao atualizar batida', 'error'),
       }
     );
   };
 
-  const handleDelete = (id: string, punchType: PunchType) => {
-    setDeleteConfirm({ id, punchType });
+  const handleDelete = (id: string, tipo: TipoBatida) => {
+    setDeleteConfirm({ id, tipo });
   };
 
   const handleConfirmDelete = () => {
     if (!deleteConfirm) return;
-    deletePunchMutation.mutate(
-      { id: deleteConfirm.id, punchType: deleteConfirm.punchType },
+    removerBatida.mutate(
+      { id: deleteConfirm.id, tipo: deleteConfirm.tipo },
       {
         onSuccess: () => {
           const labels: Record<string, string> = {
-            entry_1: 'Entrada',
-            exit_1: 'Saída Almoço',
-            entry_2: 'Retorno Almoço',
-            exit_2: 'Saída Final',
+            entrada: 'Entrada',
+            saida_almoco: 'Saída Almoço',
+            retorno_almoco: 'Retorno Almoço',
+            saida_final: 'Saída Final',
           };
-          showToast(`${labels[deleteConfirm.punchType]} removida`, 'success');
+          showToast(`${labels[deleteConfirm.tipo]} removida`, 'success');
         },
-        onError: () => {
-          showToast('Erro ao remover batida', 'error');
-        },
+        onError: () => showToast('Erro ao remover batida', 'error'),
       }
     );
     setDeleteConfirm(null);
   };
 
-  const isPending = punchMutation.isPending || deletePunchMutation.isPending || updateSinglePunchMutation.isPending;
+  const isPending = baterPonto.isPending || removerBatida.isPending || atualizarBatida.isPending;
 
   if (isLoading) {
     return (
@@ -128,27 +121,27 @@ export function PunchPage() {
     <div className="flex flex-col items-center gap-6 p-4">
       <div className="text-center">
         <p className="text-sm text-gray-500 capitalize">
-          {now.format('dddd, DD [de] MMMM [de] YYYY')}
+          {agora.format('dddd, DD [de] MMMM [de] YYYY')}
         </p>
         <p className="text-4xl font-mono font-bold text-gray-900 mt-1">
-          {now.format('HH:mm:ss')}
+          {agora.format('HH:mm:ss')}
         </p>
       </div>
 
       <PunchButton
-        nextPunchType={nextPunchType}
+        nextPunchType={proximoTipo}
         onPunch={handlePunchClick}
         disabled={isPending}
       />
 
       <div className="w-full max-w-sm">
         <p className="text-center text-lg font-medium text-gray-900">
-          Trabalhado hoje: {formatMinutes(totalWorkedMinutes)}
+          Trabalhado hoje: {formatarMinutos(totalMinutos)}
         </p>
       </div>
 
       <div className="w-full max-w-sm">
-        <ProgressBar progress={progress} />
+        <ProgressBar progress={progresso} />
       </div>
 
       <Card className="w-full max-w-sm">
@@ -162,10 +155,10 @@ export function PunchPage() {
       </Card>
 
       <ConfirmPunchModal
-        open={showConfirmModal}
-        onClose={() => { setShowConfirmModal(false); setPendingPunchType(null); }}
+        open={showModal}
+        onClose={() => { setShowModal(false); setTipoPendente(null); }}
         onConfirm={handleConfirmPunch}
-        punchType={pendingPunchType}
+        tipo={tipoPendente}
       />
 
       <Modal

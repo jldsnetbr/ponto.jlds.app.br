@@ -6,11 +6,11 @@ import { PunchPage } from '@/pages/PunchPage';
 import { BankPage } from '@/pages/BankPage';
 import { HistoryPage } from '@/pages/HistoryPage';
 import { SettingsPage } from '@/pages/SettingsPage';
-import { useNotifications } from '@/hooks/useNotifications';
+import { useNotificacoes } from '@/hooks/useNotifications';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 
 export default function App() {
-  useNotifications();
+  useNotificacoes();
 
   return (
     <ErrorBoundary>
@@ -24,11 +24,11 @@ export default function App() {
             </ProtectedRoute>
           }
         >
-          <Route path="/" element={<Navigate to="/punch" replace />} />
-          <Route path="/punch" element={<PunchPage />} />
-          <Route path="/bank" element={<BankPage />} />
-          <Route path="/history" element={<HistoryPage />} />
-          <Route path="/settings" element={<SettingsPage />} />
+          <Route path="/" element={<Navigate to="/ponto" replace />} />
+          <Route path="/ponto" element={<PunchPage />} />
+          <Route path="/banco" element={<BankPage />} />
+          <Route path="/historico" element={<HistoryPage />} />
+          <Route path="/configuracoes" element={<SettingsPage />} />
         </Route>
       </Routes>
     </BrowserRouter>

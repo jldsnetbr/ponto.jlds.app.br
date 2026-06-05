@@ -1,47 +1,43 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from './useAuth';
-import type { UserSettings } from '@/types';
+import type { ConfiguracoesUsuario } from '@/types';
 
-export function useSettings() {
-  const { user } = useAuth();
+export function useConfiguracoes() {
+  const { usuario } = useAuth();
 
-  const query = useQuery({
-    queryKey: ['settings', user?.id],
+  return useQuery({
+    queryKey: ['configuracoes', usuario?.id],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('user_settings')
+        .from('configuracoes')
         .select('*')
-        .eq('user_id', user!.id)
+        .eq('usuario_id', usuario!.id)
         .single();
       if (error) throw error;
-      return data as UserSettings;
+      return data as ConfiguracoesUsuario;
     },
-    enabled: !!user,
+    enabled: !!usuario,
   });
-
-  return query;
 }
 
-export function useUpdateSettings() {
-  const { user } = useAuth();
+export function useAtualizarConfiguracoes() {
+  const { usuario } = useAuth();
   const queryClient = useQueryClient();
 
-  const mutation = useMutation({
-    mutationFn: async (updates: Partial<UserSettings>) => {
+  return useMutation({
+    mutationFn: async (updates: Partial<ConfiguracoesUsuario>) => {
       const { data, error } = await supabase
-        .from('user_settings')
+        .from('configuracoes')
         .update(updates)
-        .eq('user_id', user!.id)
+        .eq('usuario_id', usuario!.id)
         .select()
         .single();
       if (error) throw error;
-      return data as UserSettings;
+      return data as ConfiguracoesUsuario;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['settings'] });
+      queryClient.invalidateQueries({ queryKey: ['configuracoes'] });
     },
   });
-
-  return mutation;
 }

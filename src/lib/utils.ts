@@ -1,9 +1,9 @@
-export function formatMinutes(minutes: number): string {
-  const sign = minutes >= 0 ? '+' : '-';
-  const absMinutes = Math.abs(minutes);
-  const hours = Math.floor(absMinutes / 60);
-  const mins = absMinutes % 60;
-  return `${sign}${hours}h ${mins.toString().padStart(2, '0')}min`;
+export function formatarMinutos(minutos: number): string {
+  const sinal = minutos >= 0 ? '+' : '-';
+  const abs = Math.abs(minutos);
+  const horas = Math.floor(abs / 60);
+  const mins = abs % 60;
+  return `${sinal}${horas}h ${mins.toString().padStart(2, '0')}min`;
 }
 
 export function cn(...classes: (string | boolean | undefined | null)[]): string {

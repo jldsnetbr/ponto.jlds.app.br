@@ -1,48 +1,48 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from './useAuth';
-import type { TimeEntry } from '@/types';
+import type { RegistroPonto } from '@/types';
 import dayjs from 'dayjs';
 
-export function useTimeEntries(yearMonth?: string) {
-  const { user } = useAuth();
+export function useRegistrosPonto(anoMes?: string) {
+  const { usuario } = useAuth();
 
-  const startDate = yearMonth
-    ? dayjs(yearMonth, 'YYYY-MM').startOf('month').format('YYYY-MM-DD')
+  const inicio = anoMes
+    ? dayjs(anoMes, 'YYYY-MM').startOf('month').format('YYYY-MM-DD')
     : undefined;
-  const endDate = yearMonth
-    ? dayjs(yearMonth, 'YYYY-MM').endOf('month').format('YYYY-MM-DD')
+  const fim = anoMes
+    ? dayjs(anoMes, 'YYYY-MM').endOf('month').format('YYYY-MM-DD')
     : undefined;
 
   return useQuery({
-    queryKey: ['timeEntries', user?.id, yearMonth],
+    queryKey: ['pontos', usuario?.id, anoMes],
     queryFn: async () => {
-      let q = supabase.from('time_entries').select('*').order('date');
-      if (startDate) q = q.gte('date', startDate);
-      if (endDate) q = q.lte('date', endDate);
+      let q = supabase.from('pontos').select('*').order('data');
+      if (inicio) q = q.gte('data', inicio);
+      if (fim) q = q.lte('data', fim);
       const { data, error } = await q;
       if (error) throw error;
-      return data as TimeEntry[];
+      return data as RegistroPonto[];
     },
-    enabled: !!user,
+    enabled: !!usuario,
   });
 }
 
-export function useTodayEntry() {
-  const { user } = useAuth();
-  const today = dayjs().format('YYYY-MM-DD');
+export function useRegistroHoje() {
+  const { usuario } = useAuth();
+  const hoje = dayjs().format('YYYY-MM-DD');
 
   return useQuery({
-    queryKey: ['timeEntries', user?.id, 'today'],
+    queryKey: ['pontos', usuario?.id, 'hoje'],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('time_entries')
+        .from('pontos')
         .select('*')
-        .eq('date', today)
+        .eq('data', hoje)
         .maybeSingle();
       if (error) throw error;
-      return data as TimeEntry | null;
+      return data as RegistroPonto | null;
     },
-    enabled: !!user,
+    enabled: !!usuario,
   });
 }

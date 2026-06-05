@@ -1,47 +1,42 @@
-export interface User {
+export interface Usuario {
   id: string;
   email: string;
-  created_at: string;
+  criado_em: string;
 }
 
-export interface UserSettings {
+export interface ConfiguracoesUsuario {
   id: string;
-  user_id: string;
-  work_hours_start: string;
-  work_hours_end: string;
-  lunch_break_start: string;
-  lunch_break_end: string;
-  work_days: number[];
-  notifications_enabled: boolean;
-  notification_time: string;
-  daily_workload_minutes: number;
-  tolerance_minutes: number;
-  created_at: string;
-  updated_at: string;
+  usuario_id: string;
+  inicio_expediente: string;
+  fim_expediente: string;
+  almoco_inicio: string;
+  almoco_fim: string;
+  dias_trabalho: number[];
+  notificacoes_ativas: boolean;
+  notificacao_horario: string;
+  jornada_minutos: number;
+  tolerancia_minutos: number;
 }
 
-export interface TimeEntry {
+export interface RegistroPonto {
   id: string;
-  user_id: string;
-  date: string;
-  entry_1: string | null;
-  exit_1: string | null;
-  entry_2: string | null;
-  exit_2: string | null;
-  total_worked_minutes: number | null;
-  balance_minutes: number | null;
-  notes: string | null;
-  created_at: string;
-  updated_at: string;
+  usuario_id: string;
+  data: string;
+  entrada: string | null;
+  saida_almoco: string | null;
+  retorno_almoco: string | null;
+  saida_final: string | null;
+  total_minutos: number | null;
+  saldo_minutos: number | null;
+  observacao: string | null;
 }
 
-export interface Holiday {
+export interface Feriado {
   id: string;
-  user_id: string | null;
-  date: string;
-  name: string;
-  is_national: boolean;
-  created_at: string;
+  usuario_id: string | null;
+  data: string;
+  nome: string;
+  nacional: boolean;
 }
 
-export type PunchType = 'entry_1' | 'exit_1' | 'entry_2' | 'exit_2';
+export type TipoBatida = 'entrada' | 'saida_almoco' | 'retorno_almoco' | 'saida_final';

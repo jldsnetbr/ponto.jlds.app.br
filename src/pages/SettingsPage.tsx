@@ -1,60 +1,60 @@
 import { useState, useEffect } from 'react';
 import dayjs from 'dayjs';
-import { useSettings, useUpdateSettings } from '@/hooks/useSettings';
-import { useHolidays, useAddHoliday, useDeleteHoliday } from '@/hooks/useHolidays';
+import { useConfiguracoes, useAtualizarConfiguracoes } from '@/hooks/useSettings';
+import { useFeriados, useAdicionarFeriado, useRemoverFeriado } from '@/hooks/useHolidays';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast, Card, Button, Input, TimePicker } from '@/components/ui';
 import { requestNotificationPermission } from '@/lib/notifications';
-import { calculateWorkloadMinutes } from '@/lib/calculations';
+import { calcularJornada } from '@/lib/calculations';
 
-const dayLabels = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+const diasLabels = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
 
 export function SettingsPage() {
-  const { data: settings, isLoading } = useSettings();
-  const updateMutation = useUpdateSettings();
-  const { data: holidays } = useHolidays();
-  const addHolidayMutation = useAddHoliday();
-  const deleteHolidayMutation = useDeleteHoliday();
-  const { signOut } = useAuth();
+  const { data: config, isLoading } = useConfiguracoes();
+  const mutation = useAtualizarConfiguracoes();
+  const { data: feriados } = useFeriados();
+  const addFeriado = useAdicionarFeriado();
+  const delFeriado = useRemoverFeriado();
+  const { sair } = useAuth();
   const { showToast } = useToast();
 
-  const [workHoursStart, setWorkHoursStart] = useState('08:00');
-  const [workHoursEnd, setWorkHoursEnd] = useState('17:00');
-  const [lunchBreakStart, setLunchBreakStart] = useState('12:00');
-  const [lunchBreakEnd, setLunchBreakEnd] = useState('13:00');
-  const [workDays, setWorkDays] = useState<number[]>([1, 2, 3, 4, 5]);
-  const [notificationsEnabled, setNotificationsEnabled] = useState(false);
-  const [notificationTime, setNotificationTime] = useState('07:30');
-  const [newHolidayDate, setNewHolidayDate] = useState('');
-  const [newHolidayName, setNewHolidayName] = useState('');
-  const [showAddHoliday, setShowAddHoliday] = useState(false);
+  const [inicioExpediente, setInicioExpediente] = useState('08:00');
+  const [fimExpediente, setFimExpediente] = useState('17:00');
+  const [almocoInicio, setAlmocoInicio] = useState('12:00');
+  const [almocoFim, setAlmocoFim] = useState('13:00');
+  const [diasTrabalho, setDiasTrabalho] = useState<number[]>([1, 2, 3, 4, 5]);
+  const [notificacoesAtivas, setNotificacoesAtivas] = useState(false);
+  const [notificacaoHorario, setNotificacaoHorario] = useState('07:30');
+  const [novoFeriadoData, setNovoFeriadoData] = useState('');
+  const [novoFeriadoNome, setNovoFeriadoNome] = useState('');
+  const [showAddFeriado, setShowAddFeriado] = useState(false);
 
   useEffect(() => {
-    if (settings) {
-      setWorkHoursStart(settings.work_hours_start.slice(0, 5));
-      setWorkHoursEnd(settings.work_hours_end.slice(0, 5));
-      setLunchBreakStart(settings.lunch_break_start.slice(0, 5));
-      setLunchBreakEnd(settings.lunch_break_end.slice(0, 5));
-      setWorkDays(settings.work_days as number[]);
-      setNotificationsEnabled(settings.notifications_enabled);
-      setNotificationTime(settings.notification_time.slice(0, 5));
+    if (config) {
+      setInicioExpediente(config.inicio_expediente.slice(0, 5));
+      setFimExpediente(config.fim_expediente.slice(0, 5));
+      setAlmocoInicio(config.almoco_inicio.slice(0, 5));
+      setAlmocoFim(config.almoco_fim.slice(0, 5));
+      setDiasTrabalho(config.dias_trabalho as number[]);
+      setNotificacoesAtivas(config.notificacoes_ativas);
+      setNotificacaoHorario(config.notificacao_horario.slice(0, 5));
     }
-  }, [settings]);
+  }, [config]);
 
-  const handleSave = () => {
-    const dailyWorkloadMinutes = calculateWorkloadMinutes(workHoursStart, workHoursEnd, lunchBreakStart, lunchBreakEnd);
+  const handleSalvar = () => {
+    const jornadaMinutos = calcularJornada(inicioExpediente, fimExpediente, almocoInicio, almocoFim);
 
-    updateMutation.mutate(
+    mutation.mutate(
       {
-        work_hours_start: workHoursStart,
-        work_hours_end: workHoursEnd,
-        lunch_break_start: lunchBreakStart,
-        lunch_break_end: lunchBreakEnd,
-        work_days: workDays,
-        notifications_enabled: notificationsEnabled,
-        notification_time: notificationTime,
-        daily_workload_minutes: dailyWorkloadMinutes,
-        tolerance_minutes: 5,
+        inicio_expediente: inicioExpediente,
+        fim_expediente: fimExpediente,
+        almoco_inicio: almocoInicio,
+        almoco_fim: almocoFim,
+        dias_trabalho: diasTrabalho,
+        notificacoes_ativas: notificacoesAtivas,
+        notificacao_horario: notificacaoHorario,
+        jornada_minutos: jornadaMinutos,
+        tolerancia_minutos: 5,
       },
       {
         onSuccess: () => showToast('Configurações salvas', 'success'),
@@ -63,48 +63,33 @@ export function SettingsPage() {
     );
   };
 
-  const toggleWorkDay = (day: number) => {
-    setWorkDays((prev) =>
-      prev.includes(day) ? prev.filter((d) => d !== day) : [...prev, day]
+  const toggleDia = (dia: number) => {
+    setDiasTrabalho((prev) =>
+      prev.includes(dia) ? prev.filter((d) => d !== dia) : [...prev, dia]
     );
   };
 
-  const handleToggleNotifications = async () => {
-    if (!notificationsEnabled) {
+  const handleToggleNotificacoes = async () => {
+    if (!notificacoesAtivas) {
       const granted = await requestNotificationPermission();
-      if (!granted) {
-        showToast('Permissão de notificação negada', 'error');
-        return;
-      }
+      if (!granted) { showToast('Permissão de notificação negada', 'error'); return; }
     }
-    setNotificationsEnabled(!notificationsEnabled);
+    setNotificacoesAtivas(!notificacoesAtivas);
   };
 
-  const handleAddHoliday = () => {
-    if (!newHolidayDate || !newHolidayName.trim()) return;
-    addHolidayMutation.mutate(
-      { date: newHolidayDate, name: newHolidayName },
+  const handleAddFeriado = () => {
+    if (!novoFeriadoData || !novoFeriadoNome.trim()) return;
+    addFeriado.mutate(
+      { data: novoFeriadoData, nome: novoFeriadoNome },
       {
-        onSuccess: () => {
-          showToast('Feriado adicionado', 'success');
-          setNewHolidayDate('');
-          setNewHolidayName('');
-          setShowAddHoliday(false);
-        },
+        onSuccess: () => { showToast('Feriado adicionado', 'success'); setNovoFeriadoData(''); setNovoFeriadoNome(''); setShowAddFeriado(false); },
         onError: () => showToast('Erro ao adicionar feriado', 'error'),
       }
     );
   };
 
-  const handleDeleteHoliday = (id: string) => {
-    deleteHolidayMutation.mutate(id, {
-      onSuccess: () => showToast('Feriado removido', 'success'),
-      onError: () => showToast('Erro ao remover feriado', 'error'),
-    });
-  };
-
-  const personalHolidays = (holidays || []).filter((h) => h.user_id !== null);
-  const nationalHolidays = (holidays || []).filter((h) => h.user_id === null);
+  const feriadosPessoais = (feriados || []).filter((h) => h.usuario_id !== null);
+  const feriadosNacionais = (feriados || []).filter((h) => h.usuario_id === null);
 
   if (isLoading) {
     return (
@@ -119,24 +104,22 @@ export function SettingsPage() {
       <Card className="flex flex-col gap-4">
         <h3 className="text-base font-semibold text-gray-900">Horários</h3>
         <div className="grid grid-cols-2 gap-3">
-          <TimePicker label="Entrada" value={workHoursStart} onChange={setWorkHoursStart} />
-          <TimePicker label="Saída" value={workHoursEnd} onChange={setWorkHoursEnd} />
-          <TimePicker label="Início Almoço" value={lunchBreakStart} onChange={setLunchBreakStart} />
-          <TimePicker label="Fim Almoço" value={lunchBreakEnd} onChange={setLunchBreakEnd} />
+          <TimePicker label="Entrada" value={inicioExpediente} onChange={setInicioExpediente} />
+          <TimePicker label="Saída" value={fimExpediente} onChange={setFimExpediente} />
+          <TimePicker label="Início Almoço" value={almocoInicio} onChange={setAlmocoInicio} />
+          <TimePicker label="Fim Almoço" value={almocoFim} onChange={setAlmocoFim} />
         </div>
       </Card>
 
       <Card className="flex flex-col gap-3">
         <h3 className="text-base font-semibold text-gray-900">Dias Trabalhados</h3>
         <div className="flex flex-wrap gap-2">
-          {dayLabels.map((label, index) => (
+          {diasLabels.map((label, index) => (
             <button
               key={index}
-              onClick={() => toggleWorkDay(index)}
+              onClick={() => toggleDia(index)}
               className={`px-3 py-2 rounded-lg text-sm font-medium min-h-[44px] min-w-[44px] transition-colors ${
-                workDays.includes(index)
-                  ? 'bg-blue-500 text-white'
-                  : 'bg-gray-200 text-gray-600'
+                diasTrabalho.includes(index) ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-600'
               }`}
             >
               {label}
@@ -150,65 +133,53 @@ export function SettingsPage() {
         <div className="flex items-center justify-between">
           <span className="text-sm text-gray-700">Ativar notificações</span>
           <button
-            onClick={handleToggleNotifications}
-            className={`w-12 h-7 rounded-full transition-colors ${
-              notificationsEnabled ? 'bg-blue-500' : 'bg-gray-300'
-            }`}
+            onClick={handleToggleNotificacoes}
+            className={`w-12 h-7 rounded-full transition-colors ${notificacoesAtivas ? 'bg-blue-500' : 'bg-gray-300'}`}
           >
-            <div
-              className={`w-5 h-5 rounded-full bg-white shadow transition-transform ${
-                notificationsEnabled ? 'translate-x-6' : 'translate-x-1'
-              }`}
-            />
+            <div className={`w-5 h-5 rounded-full bg-white shadow transition-transform ${notificacoesAtivas ? 'translate-x-6' : 'translate-x-1'}`} />
           </button>
         </div>
-        {notificationsEnabled && (
-          <TimePicker label="Horário do lembrete" value={notificationTime} onChange={setNotificationTime} />
+        {notificacoesAtivas && (
+          <TimePicker label="Horário do lembrete" value={notificacaoHorario} onChange={setNotificacaoHorario} />
         )}
       </Card>
 
       <Card className="flex flex-col gap-3">
         <div className="flex items-center justify-between">
           <h3 className="text-base font-semibold text-gray-900">Feriados</h3>
-          <button
-            onClick={() => setShowAddHoliday(!showAddHoliday)}
-            className="text-blue-500 text-sm font-medium min-h-[44px] min-w-[44px] flex items-center justify-center"
-          >
+          <button onClick={() => setShowAddFeriado(!showAddFeriado)} className="text-blue-500 text-sm font-medium min-h-[44px] min-w-[44px] flex items-center justify-center">
             + Adicionar
           </button>
         </div>
 
-        {showAddHoliday && (
+        {showAddFeriado && (
           <div className="flex flex-col gap-2 p-3 bg-gray-50 rounded-lg">
-            <Input label="Data" type="date" value={newHolidayDate} onChange={(e) => setNewHolidayDate(e.target.value)} />
-            <Input label="Nome" type="text" value={newHolidayName} onChange={(e) => setNewHolidayName(e.target.value)} placeholder="Ex: Aniversário da cidade" />
-            <Button size="sm" onClick={handleAddHoliday} disabled={!newHolidayDate || !newHolidayName.trim()}>
+            <Input label="Data" type="date" value={novoFeriadoData} onChange={(e) => setNovoFeriadoData(e.target.value)} />
+            <Input label="Nome" type="text" value={novoFeriadoNome} onChange={(e) => setNovoFeriadoNome(e.target.value)} placeholder="Ex: Aniversário da cidade" />
+            <Button size="sm" onClick={handleAddFeriado} disabled={!novoFeriadoData || !novoFeriadoNome.trim()}>
               Adicionar
             </Button>
           </div>
         )}
 
-        {nationalHolidays.length > 0 && (
+        {feriadosNacionais.length > 0 && (
           <div className="flex flex-col gap-1">
             <p className="text-xs font-medium text-gray-500 uppercase">Nacionais</p>
-            {nationalHolidays.map((h) => (
+            {feriadosNacionais.map((h) => (
               <div key={h.id} className="flex items-center justify-between py-1">
-                <span className="text-sm text-gray-700">{dayjs(h.date).format('DD/MM')} - {h.name}</span>
+                <span className="text-sm text-gray-700">{dayjs(h.data).format('DD/MM')} - {h.nome}</span>
               </div>
             ))}
           </div>
         )}
 
-        {personalHolidays.length > 0 && (
+        {feriadosPessoais.length > 0 && (
           <div className="flex flex-col gap-1">
             <p className="text-xs font-medium text-gray-500 uppercase">Personalizados</p>
-            {personalHolidays.map((h) => (
+            {feriadosPessoais.map((h) => (
               <div key={h.id} className="flex items-center justify-between py-1">
-                <span className="text-sm text-gray-700">{dayjs(h.date).format('DD/MM')} - {h.name}</span>
-                <button
-                  onClick={() => handleDeleteHoliday(h.id)}
-                  className="text-red-500 text-sm min-h-[44px] min-w-[44px] flex items-center justify-center"
-                >
+                <span className="text-sm text-gray-700">{dayjs(h.data).format('DD/MM')} - {h.nome}</span>
+                <button onClick={() => delFeriado.mutate(h.id)} className="text-red-500 text-sm min-h-[44px] min-w-[44px] flex items-center justify-center">
                   Excluir
                 </button>
               </div>
@@ -217,14 +188,11 @@ export function SettingsPage() {
         )}
       </Card>
 
-      <Button onClick={handleSave} fullWidth disabled={updateMutation.isPending}>
-        {updateMutation.isPending ? 'Salvando...' : 'Salvar configurações'}
+      <Button onClick={handleSalvar} fullWidth disabled={mutation.isPending}>
+        {mutation.isPending ? 'Salvando...' : 'Salvar configurações'}
       </Button>
 
-      <button
-        onClick={signOut}
-        className="text-center text-red-500 font-medium py-3 min-h-[44px]"
-      >
+      <button onClick={sair} className="text-center text-red-500 font-medium py-3 min-h-[44px]">
         Sair
       </button>
     </div>

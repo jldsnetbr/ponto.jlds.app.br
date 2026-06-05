@@ -1,41 +1,41 @@
 import { pgTable, uuid, varchar, timestamp, time, date, jsonb, boolean, integer, text } from 'drizzle-orm/pg-core';
 
-export const userSettings = pgTable('user_settings', {
+export const configuracoes = pgTable('configuracoes', {
   id: uuid('id').primaryKey().defaultRandom(),
-  userId: uuid('user_id').unique().notNull(),
-  workHoursStart: time('work_hours_start').default('08:00:00').notNull(),
-  workHoursEnd: time('work_hours_end').default('17:00:00').notNull(),
-  lunchBreakStart: time('lunch_break_start').default('12:00:00').notNull(),
-  lunchBreakEnd: time('lunch_break_end').default('13:00:00').notNull(),
-  workDays: jsonb('work_days').default([1, 2, 3, 4, 5]).notNull(),
-  notificationsEnabled: boolean('notifications_enabled').default(false).notNull(),
-  notificationTime: time('notification_time').default('07:30:00').notNull(),
-  dailyWorkloadMinutes: integer('daily_workload_minutes').default(480).notNull(),
-  toleranceMinutes: integer('tolerance_minutes').default(5).notNull(),
-  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
-  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow(),
+  usuarioId: uuid('usuario_id').unique().notNull(),
+  inicioExpediente: time('inicio_expediente').default('08:00:00').notNull(),
+  fimExpediente: time('fim_expediente').default('17:00:00').notNull(),
+  almocoInicio: time('almoco_inicio').default('12:00:00').notNull(),
+  almocoFim: time('almoco_fim').default('13:00:00').notNull(),
+  diasTrabalho: jsonb('dias_trabalho').default([1, 2, 3, 4, 5]).notNull(),
+  notificacoesAtivas: boolean('notificacoes_ativas').default(false).notNull(),
+  notificacaoHorario: time('notificacao_horario').default('07:30:00').notNull(),
+  jornadaMinutos: integer('jornada_minutos').default(480).notNull(),
+  toleranciaMinutos: integer('tolerancia_minutos').default(5).notNull(),
+  criadoEm: timestamp('criado_em', { withTimezone: true }).defaultNow(),
+  atualizadoEm: timestamp('atualizado_em', { withTimezone: true }).defaultNow(),
 });
 
-export const timeEntries = pgTable('time_entries', {
+export const pontos = pgTable('pontos', {
   id: uuid('id').primaryKey().defaultRandom(),
-  userId: uuid('user_id').notNull(),
-  date: date('date').notNull(),
-  entry1: timestamp('entry_1', { withTimezone: true }),
-  exit1: timestamp('exit_1', { withTimezone: true }),
-  entry2: timestamp('entry_2', { withTimezone: true }),
-  exit2: timestamp('exit_2', { withTimezone: true }),
-  totalWorkedMinutes: integer('total_worked_minutes'),
-  balanceMinutes: integer('balance_minutes'),
-  notes: text('notes'),
-  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
-  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow(),
+  usuarioId: uuid('usuario_id').notNull(),
+  data: date('data').notNull(),
+  entrada: timestamp('entrada', { withTimezone: true }),
+  saidaAlmoco: timestamp('saida_almoco', { withTimezone: true }),
+  retornoAlmoco: timestamp('retorno_almoco', { withTimezone: true }),
+  saidaFinal: timestamp('saida_final', { withTimezone: true }),
+  totalMinutos: integer('total_minutos'),
+  saldoMinutos: integer('saldo_minutos'),
+  observacao: text('observacao'),
+  criadoEm: timestamp('criado_em', { withTimezone: true }).defaultNow(),
+  atualizadoEm: timestamp('atualizado_em', { withTimezone: true }).defaultNow(),
 });
 
-export const holidays = pgTable('holidays', {
+export const feriados = pgTable('feriados', {
   id: uuid('id').primaryKey().defaultRandom(),
-  userId: uuid('user_id'),
-  date: date('date').notNull(),
-  name: varchar('name', { length: 255 }).notNull(),
-  isNational: boolean('is_national').default(false).notNull(),
-  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
+  usuarioId: uuid('usuario_id'),
+  data: date('data').notNull(),
+  nome: varchar('nome', { length: 255 }).notNull(),
+  nacional: boolean('nacional').default(false).notNull(),
+  criadoEm: timestamp('criado_em', { withTimezone: true }).defaultNow(),
 });

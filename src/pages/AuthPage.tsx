@@ -6,45 +6,45 @@ import { Button, Input } from '@/components/ui';
 export function AuthPage() {
   const [mode, setMode] = useState<'login' | 'register'>('login');
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
-  const { signIn, signUp } = useAuth();
+  const [senha, setSenha] = useState('');
+  const [confirmSenha, setConfirmSenha] = useState('');
+  const [erro, setErro] = useState('');
+  const [carregando, setCarregando] = useState(false);
+  const { entrar, cadastrar } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    setError('');
+    setErro('');
 
-    if (!email.trim() || !password) {
-      setError('Preencha todos os campos');
+    if (!email.trim() || !senha) {
+      setErro('Preencha todos os campos');
       return;
     }
 
-    if (mode === 'register' && password !== confirmPassword) {
-      setError('As senhas não coincidem');
+    if (mode === 'register' && senha !== confirmSenha) {
+      setErro('As senhas não coincidem');
       return;
     }
 
-    if (password.length < 6) {
-      setError('Senha deve ter no mínimo 6 caracteres');
+    if (senha.length < 6) {
+      setErro('Senha deve ter no mínimo 6 caracteres');
       return;
     }
 
-    setLoading(true);
+    setCarregando(true);
     try {
       if (mode === 'login') {
-        await signIn(email, password);
+        await entrar(email, senha);
       } else {
-        await signUp(email, password);
+        await cadastrar(email, senha);
       }
-      navigate('/punch');
+      navigate('/ponto');
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Erro na autenticação';
-      setError(message);
+      const msg = err instanceof Error ? err.message : 'Erro na autenticação';
+      setErro(msg);
     } finally {
-      setLoading(false);
+      setCarregando(false);
     }
   };
 
@@ -68,8 +68,8 @@ export function AuthPage() {
           <Input
             label="Senha"
             type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            value={senha}
+            onChange={(e) => setSenha(e.target.value)}
             placeholder="Mínimo 6 caracteres"
             autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
           />
@@ -78,19 +78,19 @@ export function AuthPage() {
             <Input
               label="Confirmar senha"
               type="password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
+              value={confirmSenha}
+              onChange={(e) => setConfirmSenha(e.target.value)}
               placeholder="Repita a senha"
               autoComplete="new-password"
             />
           )}
 
-          {error && (
-            <p className="text-sm text-red-500 text-center">{error}</p>
+          {erro && (
+            <p className="text-sm text-red-500 text-center">{erro}</p>
           )}
 
-          <Button type="submit" fullWidth disabled={loading}>
-            {loading ? 'Carregando...' : mode === 'login' ? 'Entrar' : 'Criar conta'}
+          <Button type="submit" fullWidth disabled={carregando}>
+            {carregando ? 'Carregando...' : mode === 'login' ? 'Entrar' : 'Criar conta'}
           </Button>
         </form>
 
@@ -100,7 +100,7 @@ export function AuthPage() {
               Não tem conta?{' '}
               <button
                 type="button"
-                onClick={() => { setMode('register'); setError(''); }}
+                onClick={() => { setMode('register'); setErro(''); }}
                 className="text-blue-500 font-medium"
               >
                 Cadastre-se
@@ -111,7 +111,7 @@ export function AuthPage() {
               Já tem conta?{' '}
               <button
                 type="button"
-                onClick={() => { setMode('login'); setError(''); }}
+                onClick={() => { setMode('login'); setErro(''); }}
                 className="text-blue-500 font-medium"
               >
                 Faça login
