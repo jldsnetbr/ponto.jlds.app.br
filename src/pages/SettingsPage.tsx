@@ -5,6 +5,7 @@ import { useHolidays, useAddHoliday, useDeleteHoliday } from '@/hooks/useHoliday
 import { useAuth } from '@/hooks/useAuth';
 import { useToast, Card, Button, Input, TimePicker } from '@/components/ui';
 import { requestNotificationPermission } from '@/lib/notifications';
+import { calculateWorkloadMinutes } from '@/lib/calculations';
 
 const dayLabels = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
 
@@ -24,8 +25,6 @@ export function SettingsPage() {
   const [workDays, setWorkDays] = useState<number[]>([1, 2, 3, 4, 5]);
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
   const [notificationTime, setNotificationTime] = useState('07:30');
-  const [dailyWorkload, setDailyWorkload] = useState(8);
-  const [tolerance, setTolerance] = useState(5);
   const [newHolidayDate, setNewHolidayDate] = useState('');
   const [newHolidayName, setNewHolidayName] = useState('');
   const [showAddHoliday, setShowAddHoliday] = useState(false);
@@ -39,12 +38,12 @@ export function SettingsPage() {
       setWorkDays(settings.work_days as number[]);
       setNotificationsEnabled(settings.notifications_enabled);
       setNotificationTime(settings.notification_time.slice(0, 5));
-      setDailyWorkload(settings.daily_workload_minutes / 60);
-      setTolerance(settings.tolerance_minutes);
     }
   }, [settings]);
 
   const handleSave = () => {
+    const dailyWorkloadMinutes = calculateWorkloadMinutes(workHoursStart, workHoursEnd, lunchBreakStart, lunchBreakEnd);
+
     updateMutation.mutate(
       {
         work_hours_start: workHoursStart,
@@ -54,8 +53,8 @@ export function SettingsPage() {
         work_days: workDays,
         notifications_enabled: notificationsEnabled,
         notification_time: notificationTime,
-        daily_workload_minutes: dailyWorkload * 60,
-        tolerance_minutes: tolerance,
+        daily_workload_minutes: dailyWorkloadMinutes,
+        tolerance_minutes: 5,
       },
       {
         onSuccess: () => showToast('Configurações salvas', 'success'),
@@ -166,26 +165,6 @@ export function SettingsPage() {
         {notificationsEnabled && (
           <TimePicker label="Horário do lembrete" value={notificationTime} onChange={setNotificationTime} />
         )}
-      </Card>
-
-      <Card className="flex flex-col gap-3">
-        <h3 className="text-base font-semibold text-gray-900">Jornada</h3>
-        <Input
-          label="Horas por dia"
-          type="number"
-          min={1}
-          max={24}
-          value={String(dailyWorkload)}
-          onChange={(e) => setDailyWorkload(Number(e.target.value))}
-        />
-        <Input
-          label="Tolerância (minutos)"
-          type="number"
-          min={0}
-          max={60}
-          value={String(tolerance)}
-          onChange={(e) => setTolerance(Number(e.target.value))}
-        />
       </Card>
 
       <Card className="flex flex-col gap-3">

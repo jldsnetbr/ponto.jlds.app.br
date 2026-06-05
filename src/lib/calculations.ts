@@ -45,3 +45,16 @@ export function calculateMonthlyBalance(entries: { balance_minutes: number | nul
     return sum + (entry.balance_minutes || 0);
   }, 0);
 }
+
+export function calculateWorkloadMinutes(
+  workHoursStart: string,
+  workHoursEnd: string,
+  lunchBreakStart: string,
+  lunchBreakEnd: string
+): number {
+  const start = dayjs(`2000-01-01T${workHoursStart}`);
+  const end = dayjs(`2000-01-01T${workHoursEnd}`);
+  const lunchStart = dayjs(`2000-01-01T${lunchBreakStart}`);
+  const lunchEnd = dayjs(`2000-01-01T${lunchBreakEnd}`);
+  return Math.max(0, end.diff(start, 'minute') - lunchEnd.diff(lunchStart, 'minute'));
+}

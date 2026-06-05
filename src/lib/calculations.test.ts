@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { calculateDay, getNextPunchType, calculateMonthlyBalance } from './calculations';
+import { calculateDay, getNextPunchType, calculateMonthlyBalance, calculateWorkloadMinutes } from './calculations';
 import { formatMinutes } from './utils';
 
 describe('calculateDay', () => {
@@ -124,5 +124,23 @@ describe('formatMinutes', () => {
 
   it('formata horas exatas', () => {
     expect(formatMinutes(480)).toBe('+8h 00min');
+  });
+});
+
+describe('calculateWorkloadMinutes', () => {
+  it('calcula 8h para jornada padrao (08:00-17:00 com 1h de almoco)', () => {
+    expect(calculateWorkloadMinutes('08:00', '17:00', '12:00', '13:00')).toBe(480);
+  });
+
+  it('calcula 6h para jornada 08:00-14:00 sem almoco', () => {
+    expect(calculateWorkloadMinutes('08:00', '14:00', '12:00', '12:00')).toBe(360);
+  });
+
+  it('calcula 4h para jornada 08:00-12:00', () => {
+    expect(calculateWorkloadMinutes('08:00', '12:00', '12:00', '12:00')).toBe(240);
+  });
+
+  it('retorna 0 quando saido < entrada', () => {
+    expect(calculateWorkloadMinutes('17:00', '08:00', '12:00', '13:00')).toBe(0);
   });
 });
