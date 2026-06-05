@@ -1,14 +1,11 @@
-/*
-  X-Robots-Tag: noindex
+# Cloudflare Pages headers
+# Assets: force correct MIME types (Cloudflare sometimes serves .js as application/octet-stream)
+/assets/*
+  Content-Type: text/javascript
 
-/assets/*.js
-  Content-Type: application/javascript
-
-/assets/*.css
-  Content-Type: text/css
-
+# Service worker
 /sw.js
-  Content-Type: application/javascript
+  Content-Type: text/javascript
 
 /registerSW.js
-  Content-Type: application/javascript
+  Content-Type: text/javascript
