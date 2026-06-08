@@ -9,7 +9,7 @@ interface State {
   error: Error | null;
 }
 
-export class ErrorBoundary extends Component<Props, State> {
+export class LimiteDeErro extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = { hasError: false, error: null };
@@ -20,7 +20,7 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, info: ErrorInfo) {
-    console.error('Erro capturado pelo ErrorBoundary:', error, info.componentStack);
+    console.error('Erro capturado pelo LimiteDeErro:', error, info.componentStack);
   }
 
   render() {
