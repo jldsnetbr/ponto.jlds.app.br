@@ -18,8 +18,6 @@ export function BankPage() {
     [allEntries, anoMes]
   );
 
-  const saldoMensal = calcularSaldoMensal(entries);
-
   const mesAnterior = () => setAnoMes(dayjs(anoMes, 'YYYY-MM').subtract(1, 'month').format('YYYY-MM'));
   const mesSeguinte = () => setAnoMes(dayjs(anoMes, 'YYYY-MM').add(1, 'month').format('YYYY-MM'));
 
@@ -52,13 +50,6 @@ export function BankPage() {
         <h2 className="text-lg font-semibold text-slate-100 capitalize">{labelMes}</h2>
         <button onClick={mesSeguinte} className="min-h-[44px] min-w-[44px] flex items-center justify-center text-slate-400 text-lg hover:text-slate-200" aria-label="Próximo mês">→</button>
       </div>
-
-      <Card className={cn('text-center py-4', saldoMensal > 0 && 'border-emerald-500/30', saldoMensal < 0 && 'border-red-500/30')}>
-        <p className="text-sm text-slate-400 mb-1">Saldo do mês</p>
-        <p className={cn('text-2xl font-bold font-mono', saldoMensal > 0 && 'text-emerald-400', saldoMensal < 0 && 'text-red-400', saldoMensal === 0 && 'text-slate-400')}>
-          {formatarMinutos(saldoMensal)}
-        </p>
-      </Card>
 
       {isLoading ? <Spinner /> : (
         <div className="flex flex-col gap-2">
