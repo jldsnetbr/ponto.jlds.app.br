@@ -77,7 +77,7 @@ export function BankPage() {
                       {saldoZero ? formatarMinutos(0) : formatarMinutos(saldo)}
                     </span>
                   ) : (
-                    <span className="text-sm text-slate-600 w-20 text-right">-</span>
+                    <span className="text-sm text-slate-500 w-20 text-right">-</span>
                   )}
                 </div>
               </Card>
