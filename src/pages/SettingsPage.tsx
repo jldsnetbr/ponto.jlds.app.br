@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import dayjs from 'dayjs';
 import { useConfiguracoes, useAtualizarConfiguracoes } from '@/hooks/useConfiguracoes';
 import { useFeriados, useAdicionarFeriado, useRemoverFeriado } from '@/hooks/useFeriados';
@@ -28,10 +28,9 @@ export function SettingsPage() {
   const [novoFeriadoData, setNovoFeriadoData] = useState('');
   const [novoFeriadoNome, setNovoFeriadoNome] = useState('');
   const [showAddFeriado, setShowAddFeriado] = useState(false);
-  const inicializado = useRef(false);
 
   useEffect(() => {
-    if (config && !inicializado.current) {
+    if (config) {
       setInicioExpediente(config.inicio_expediente.slice(0, 5));
       setFimExpediente(config.fim_expediente.slice(0, 5));
       setAlmocoInicio(config.almoco_inicio.slice(0, 5));
@@ -39,7 +38,6 @@ export function SettingsPage() {
       setDiasTrabalho(config.dias_trabalho as number[]);
       setNotificacoesAtivas(config.notificacoes_ativas);
       setNotificacaoHorario(config.notificacao_horario.slice(0, 5));
-      inicializado.current = true;
     }
   }, [config]);
 
