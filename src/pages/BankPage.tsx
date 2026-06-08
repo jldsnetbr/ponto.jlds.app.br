@@ -70,7 +70,7 @@ export function BankPage() {
                   {total !== null && total !== undefined ? (
                     <span className="text-sm text-slate-300 font-mono">{formatarMinutos(total)}</span>
                   ) : (
-                    <span className="text-sm text-slate-600">-</span>
+                    <span className="text-sm text-slate-500">-</span>
                   )}
                   {saldo !== null && saldo !== undefined ? (
                     <span className={cn('text-sm font-mono font-medium w-20 text-right', saldoZero ? 'text-slate-500' : saldo > 0 ? 'text-emerald-400' : 'text-red-400')}>

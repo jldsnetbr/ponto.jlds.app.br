@@ -118,9 +118,9 @@ export function HistoryPage() {
                     </p>
                   </div>
                   <span className={cn('text-sm font-mono font-medium',
-                    entry.saldo_minutos === null ? 'text-slate-500' :
+                    entry.saldo_minutos === null ? 'text-slate-400' :
                     entry.saldo_minutos > 0 ? 'text-emerald-400' :
-                    entry.saldo_minutos < 0 ? 'text-red-400' : 'text-slate-500'
+                    entry.saldo_minutos < 0 ? 'text-red-400' : 'text-slate-400'
                   )}>
                     {entry.saldo_minutos !== null ? formatarMinutos(entry.saldo_minutos) : '-'}
                   </span>

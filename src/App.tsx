@@ -1,13 +1,16 @@
+import { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthPage } from '@/pages/AuthPage';
 import { Layout } from '@/components/layout/Layout';
 import { RotaProtegida } from '@/components/RotaProtegida';
-import { PunchPage } from '@/pages/PunchPage';
-import { BankPage } from '@/pages/BankPage';
-import { HistoryPage } from '@/pages/HistoryPage';
-import { SettingsPage } from '@/pages/SettingsPage';
+import { Spinner } from '@/components/ui';
 import { LimiteDeErro } from '@/components/LimiteDeErro';
 import { ROTAS } from '@/lib/rotas';
+
+const PunchPage = lazy(() => import('@/pages/PunchPage').then(m => ({ default: m.PunchPage })));
+const BankPage = lazy(() => import('@/pages/BankPage').then(m => ({ default: m.BankPage })));
+const HistoryPage = lazy(() => import('@/pages/HistoryPage').then(m => ({ default: m.HistoryPage })));
+const SettingsPage = lazy(() => import('@/pages/SettingsPage').then(m => ({ default: m.SettingsPage })));
 
 export default function App() {
   return (
@@ -23,10 +26,18 @@ export default function App() {
           }
         >
           <Route path="/" element={<Navigate to={ROTAS.PONTO} replace />} />
-          <Route path={ROTAS.PONTO} element={<PunchPage />} />
-          <Route path={ROTAS.BANCO} element={<BankPage />} />
-          <Route path={ROTAS.HISTORICO} element={<HistoryPage />} />
-          <Route path={ROTAS.CONFIGURACOES} element={<SettingsPage />} />
+          <Route path={ROTAS.PONTO} element={
+            <Suspense fallback={<Spinner />}><PunchPage /></Suspense>
+          } />
+          <Route path={ROTAS.BANCO} element={
+            <Suspense fallback={<Spinner />}><BankPage /></Suspense>
+          } />
+          <Route path={ROTAS.HISTORICO} element={
+            <Suspense fallback={<Spinner />}><HistoryPage /></Suspense>
+          } />
+          <Route path={ROTAS.CONFIGURACOES} element={
+            <Suspense fallback={<Spinner />}><SettingsPage /></Suspense>
+          } />
         </Route>
       </Routes>
     </BrowserRouter>

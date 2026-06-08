@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import dayjs from 'dayjs';
 import { InlineTimeEditor } from '@/components/ui';
-import type { RegistroPonto, TipoBatida } from '@/types';
+import { NOMES_BATIDA, type RegistroPonto, type TipoBatida } from '@/types';
 
 interface StatusHojeProps {
   entry: RegistroPonto | null;
@@ -9,13 +9,6 @@ interface StatusHojeProps {
   onDelete: (id: string, tipo: TipoBatida) => void;
   isPending: boolean;
 }
-
-const labels: Record<string, string> = {
-  entrada: 'Entrada',
-  saida_almoco: 'Saída Almoço',
-  retorno_almoco: 'Retorno Almoço',
-  saida_final: 'Saída Final',
-};
 
 const ordem: TipoBatida[] = ['entrada', 'saida_almoco', 'retorno_almoco', 'saida_final'];
 
@@ -61,7 +54,7 @@ export function StatusHoje({ entry, onEdit, onDelete, isPending }: StatusHojePro
             />
           ) : (
             <>
-              <span className="text-slate-300">{labels[batida.tipo]}</span>
+              <span className="text-slate-300">{NOMES_BATIDA[batida.tipo]}</span>
               <div className="flex items-center gap-1">
                 <span className="font-mono font-medium text-slate-100">
                   {dayjs(batida.horario).format('HH:mm')}
@@ -69,13 +62,13 @@ export function StatusHoje({ entry, onEdit, onDelete, isPending }: StatusHojePro
                 <button
                   onClick={() => iniciarEdicao(batida.tipo)}
                   className="text-slate-500 hover:text-midnight-400 min-h-[36px] min-w-[36px] flex items-center justify-center rounded-lg hover:bg-midnight-800/50"
-                  aria-label={`Editar ${labels[batida.tipo]}`}
+                  aria-label={`Editar ${NOMES_BATIDA[batida.tipo]}`}
                 >✎</button>
                 <button
                   onClick={() => onDelete(entry.id, batida.tipo)}
                   disabled={isPending}
                   className="text-slate-500 hover:text-red-400 min-h-[36px] min-w-[36px] flex items-center justify-center rounded-lg hover:bg-red-900/30 disabled:opacity-30"
-                  aria-label={`Remover ${labels[batida.tipo]}`}
+                  aria-label={`Remover ${NOMES_BATIDA[batida.tipo]}`}
                 >🗑</button>
               </div>
             </>

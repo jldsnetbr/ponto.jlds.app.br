@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import dayjs from 'dayjs';
 import { Modal, Button } from '@/components/ui';
-import type { TipoBatida } from '@/types';
+import { NOMES_BATIDA, type TipoBatida } from '@/types';
 
 interface ModalConfirmacaoBatidaProps {
   open: boolean;
@@ -9,13 +9,6 @@ interface ModalConfirmacaoBatidaProps {
   onConfirm: (horario: string) => void;
   tipo: TipoBatida | null;
 }
-
-const labels: Record<TipoBatida, string> = {
-  entrada: 'Entrada',
-  saida_almoco: 'Saída Almoço',
-  retorno_almoco: 'Retorno Almoço',
-  saida_final: 'Saída Final',
-};
 
 export function ModalConfirmacaoBatida({ open, onClose, onConfirm, tipo }: ModalConfirmacaoBatidaProps) {
   const [horario, setHorario] = useState('');
@@ -28,7 +21,7 @@ export function ModalConfirmacaoBatida({ open, onClose, onConfirm, tipo }: Modal
     <Modal open={open} onClose={onClose} title="Confirmar Batida">
       <div className="flex flex-col items-center gap-4 py-2">
         <p className="text-xl font-bold text-midnight-400">
-          {tipo ? labels[tipo] : '---'}
+          {tipo ? NOMES_BATIDA[tipo] : '---'}
         </p>
 
         <div className="flex flex-col gap-1 w-full">

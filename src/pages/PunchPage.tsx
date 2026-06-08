@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import dayjs from 'dayjs';
 import 'dayjs/locale/pt-br';
 import { useRegistroHoje } from '@/hooks/useRegistrosPonto';
@@ -10,9 +10,10 @@ import { useToast, Card, Button, Spinner } from '@/components/ui';
 import { PunchButton } from '@/components/punch/PunchButton';
 import { StatusHoje } from '@/components/punch/StatusHoje';
 import { BarraProgresso } from '@/components/punch/BarraProgresso';
+import { Relogio } from '@/components/punch/Relogio';
 import { ModalConfirmacaoBatida } from '@/components/punch/ModalConfirmacaoBatida';
 import { Modal } from '@/components/ui/Modal';
-import type { TipoBatida } from '@/types';
+import { NOMES_BATIDA, type TipoBatida } from '@/types';
 
 dayjs.locale('pt-br');
 
@@ -22,22 +23,16 @@ export function PunchPage() {
   const baterPonto = useBaterPonto();
   const alterarPonto = useAlterarPonto();
   const { showToast } = useToast();
-  const [agora, setAgora] = useState(dayjs());
 
   const [showModal, setShowModal] = useState(false);
   const [tipoPendente, setTipoPendente] = useState<TipoBatida | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<{ id: string; tipo: TipoBatida } | null>(null);
 
-  useEffect(() => {
-    const timer = setInterval(() => setAgora(dayjs()), 1000);
-    return () => clearInterval(timer);
-  }, []);
-
   const proximoTipo = proximoTipoBatida(
     entry || { entrada: null, saida_almoco: null, retorno_almoco: null, saida_final: null }
   );
 
-  const totalMinutos = calcularTempoDecorrido(entry ?? null, agora);
+  const totalMinutos = calcularTempoDecorrido(entry ?? null, dayjs());
 
   const progresso = config
     ? (totalMinutos / config.jornada_minutos) * 100
@@ -54,17 +49,11 @@ export function PunchPage() {
     setShowModal(false);
     const hoje = dayjs().format('YYYY-MM-DD');
     const horarioISO = dayjs(`${hoje}T${horario}`).toISOString();
-    baterPonto.mutate(
+      baterPonto.mutate(
       { entry: entry || null, tipo: tipoPendente, horario: horarioISO },
       {
         onSuccess: () => {
-          const labels: Record<string, string> = {
-            entrada: 'Entrada',
-            saida_almoco: 'Saída Almoço',
-            retorno_almoco: 'Retorno Almoço',
-            saida_final: 'Saída Final',
-          };
-          showToast(`${labels[tipoPendente]} registrada às ${horario}`, 'success');
+          showToast(`${NOMES_BATIDA[tipoPendente]} registrada às ${horario}`, 'success');
         },
         onError: (err) => {
           console.error('[PONTO ERRO]', err);
@@ -94,17 +83,11 @@ export function PunchPage() {
 
   const handleConfirmDelete = () => {
     if (!deleteConfirm) return;
-    alterarPonto.mutate(
+      alterarPonto.mutate(
       { id: deleteConfirm.id, updates: { [deleteConfirm.tipo]: null } },
       {
         onSuccess: () => {
-          const labels: Record<string, string> = {
-            entrada: 'Entrada',
-            saida_almoco: 'Saída Almoço',
-            retorno_almoco: 'Retorno Almoço',
-            saida_final: 'Saída Final',
-          };
-          showToast(`${labels[deleteConfirm.tipo]} removida`, 'success');
+          showToast(`${NOMES_BATIDA[deleteConfirm.tipo]} removida`, 'success');
         },
         onError: (err) => {
           console.error('[EXCLUSAO ERRO]', err);
@@ -121,14 +104,7 @@ export function PunchPage() {
 
   return (
     <div className="flex flex-col items-center gap-6 p-4">
-      <div className="text-center">
-        <p className="text-sm text-slate-400 capitalize">
-          {agora.format('dddd, DD [de] MMMM [de] YYYY')}
-        </p>
-        <p className="text-4xl font-mono font-bold text-slate-100 mt-1">
-          {agora.format('HH:mm:ss')}
-        </p>
-      </div>
+      <Relogio />
 
       <PunchButton
         nextPunchType={proximoTipo}

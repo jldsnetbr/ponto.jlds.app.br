@@ -40,3 +40,10 @@ export interface Feriado {
 }
 
 export type TipoBatida = 'entrada' | 'saida_almoco' | 'retorno_almoco' | 'saida_final';
+
+export const NOMES_BATIDA: Record<TipoBatida, string> = {
+  entrada: 'Entrada',
+  saida_almoco: 'Saída Almoço',
+  retorno_almoco: 'Retorno Almoço',
+  saida_final: 'Saída Final',
+};
