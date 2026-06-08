@@ -1,25 +1,27 @@
 import { useEffect } from 'react';
 import { useConfiguracoes } from './useConfiguracoes';
-import { scheduleNotification, clearNotification } from '@/lib/notificacoes';
-import dayjs from 'dayjs';
+import { subscribeToPush, unsubscribeFromPush, getPushSubscription } from '@/lib/push';
 
 export function useNotificacoes() {
   const { data: config } = useConfiguracoes();
 
   useEffect(() => {
-    if (config?.notificacoes_ativas && config.notificacao_horario) {
-      const [horas, minutos] = config.notificacao_horario.split(':').map(Number);
-      let targetTime = dayjs().hour(horas).minute(minutos).second(0);
-
-      if (targetTime.isBefore(dayjs())) {
-        targetTime = targetTime.add(1, 'day');
-      }
-
-      scheduleNotification(targetTime.toDate(), 'Lembrete de Ponto', 'Não se esqueça de registrar seu ponto de hoje!');
+    if (config?.notificacoes_ativas) {
+      managePushSubscription(true);
     } else {
-      clearNotification();
+      managePushSubscription(false);
     }
+  }, [config?.notificacoes_ativas]);
+}
 
-    return () => clearNotification();
-  }, [config]);
+async function managePushSubscription(enable: boolean) {
+  if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
+
+  const existing = await getPushSubscription();
+
+  if (enable && !existing) {
+    await subscribeToPush();
+  } else if (!enable && existing) {
+    await unsubscribeFromPush();
+  }
 }

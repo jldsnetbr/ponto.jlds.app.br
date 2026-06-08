@@ -2,12 +2,15 @@ import { useState, useEffect } from 'react';
 import dayjs from 'dayjs';
 import { useConfiguracoes, useAtualizarConfiguracoes } from '@/hooks/useConfiguracoes';
 import { useFeriados, useAdicionarFeriado, useRemoverFeriado } from '@/hooks/useFeriados';
+import { useLocais, useAdicionarLocal, useRemoverLocal } from '@/hooks/useLocais';
 import { useAutenticacao } from '@/hooks/useAutenticacao';
 import { useToast, Card, Button, Input, TimePicker, Spinner } from '@/components/ui';
 import { requestNotificationPermission } from '@/lib/notificacoes';
+import { subscribeToPush, unsubscribeFromPush } from '@/lib/push';
 import { calcularJornada } from '@/lib/calculos';
 
 const diasLabels = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+const coresLocais = ['#7c3aed', '#059669', '#d97706', '#dc2626', '#2563eb', '#9333ea'];
 
 export function SettingsPage() {
   const { data: config, isLoading } = useConfiguracoes();
@@ -15,6 +18,9 @@ export function SettingsPage() {
   const { data: feriados } = useFeriados();
   const addFeriado = useAdicionarFeriado();
   const delFeriado = useRemoverFeriado();
+  const { data: locais } = useLocais();
+  const addLocal = useAdicionarLocal();
+  const delLocal = useRemoverLocal();
   const { sair } = useAutenticacao();
   const { showToast } = useToast();
 
@@ -28,6 +34,9 @@ export function SettingsPage() {
   const [novoFeriadoData, setNovoFeriadoData] = useState('');
   const [novoFeriadoNome, setNovoFeriadoNome] = useState('');
   const [showAddFeriado, setShowAddFeriado] = useState(false);
+  const [novoLocalNome, setNovoLocalNome] = useState('');
+  const [novoLocalCor, setNovoLocalCor] = useState(coresLocais[0]);
+  const [showAddLocal, setShowAddLocal] = useState(false);
 
   useEffect(() => {
     if (config) {
@@ -68,10 +77,25 @@ export function SettingsPage() {
     );
   };
 
+  const [pushSupported, setPushSupported] = useState(true);
+
+  useEffect(() => {
+    setPushSupported('serviceWorker' in navigator && 'PushManager' in window);
+  }, []);
+
   const handleToggleNotificacoes = async () => {
     if (!notificacoesAtivas) {
       const granted = await requestNotificationPermission();
       if (!granted) { showToast('Permissão de notificação negada', 'error'); return; }
+
+      if (pushSupported) {
+        const sub = await subscribeToPush();
+        if (!sub) { showToast('Erro ao ativar push notifications', 'error'); return; }
+      }
+    } else {
+      if (pushSupported) {
+        await unsubscribeFromPush();
+      }
     }
     setNotificacoesAtivas(!notificacoesAtivas);
   };
@@ -89,6 +113,17 @@ export function SettingsPage() {
 
   const feriadosPessoais = (feriados || []).filter((h) => h.usuario_id !== null);
   const feriadosNacionais = (feriados || []).filter((h) => h.usuario_id === null);
+
+  const handleAddLocal = () => {
+    if (!novoLocalNome.trim()) return;
+    addLocal.mutate(
+      { nome: novoLocalNome, cor: novoLocalCor },
+      {
+        onSuccess: () => { showToast('Local adicionado', 'success'); setNovoLocalNome(''); setShowAddLocal(false); },
+        onError: () => showToast('Erro ao adicionar local', 'error'),
+      }
+    );
+  };
 
   if (isLoading) return <Spinner />;
 
@@ -173,6 +208,50 @@ export function SettingsPage() {
               <div key={h.id} className="flex items-center justify-between py-1">
                 <span className="text-sm text-slate-300">{dayjs(h.data).format('DD/MM')} - {h.nome}</span>
                 <button onClick={() => delFeriado.mutate(h.id)} className="text-red-400 text-sm min-h-[44px] min-w-[44px] flex items-center justify-center">
+                  Excluir
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+      </Card>
+
+      <Card className="flex flex-col gap-3">
+        <div className="flex items-center justify-between">
+          <h3 className="text-base font-semibold text-slate-100">Locais de Trabalho</h3>
+          <button onClick={() => setShowAddLocal(!showAddLocal)} className="text-midnight-400 text-sm font-medium min-h-[44px] min-w-[44px] flex items-center justify-center">
+            + Adicionar
+          </button>
+        </div>
+
+        {showAddLocal && (
+          <div className="flex flex-col gap-2 p-3 bg-midnight-800/40 rounded-lg border border-midnight-400/20">
+            <Input label="Nome" type="text" value={novoLocalNome} onChange={(e) => setNovoLocalNome(e.target.value)} placeholder="Ex: Obra Centro" />
+            <div className="flex gap-2">
+              {coresLocais.map((cor) => (
+                <button
+                  key={cor}
+                  onClick={() => setNovoLocalCor(cor)}
+                  className={`w-8 h-8 rounded-full ${novoLocalCor === cor ? 'ring-2 ring-white' : ''}`}
+                  style={{ backgroundColor: cor }}
+                />
+              ))}
+            </div>
+            <Button size="sm" onClick={handleAddLocal} disabled={!novoLocalNome.trim()}>
+              Adicionar
+            </Button>
+          </div>
+        )}
+
+        {(locais || []).length > 0 && (
+          <div className="flex flex-col gap-1">
+            {locais!.map((local) => (
+              <div key={local.id} className="flex items-center justify-between py-1">
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full" style={{ backgroundColor: local.cor }} />
+                  <span className="text-sm text-slate-300">{local.nome}</span>
+                </div>
+                <button onClick={() => delLocal.mutate(local.id)} className="text-red-400 text-sm min-h-[44px] min-w-[44px] flex items-center justify-center">
                   Excluir
                 </button>
               </div>

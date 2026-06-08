@@ -28,7 +28,9 @@ export interface RegistroPonto {
   saida_final: string | null;
   total_minutos: number | null;
   saldo_minutos: number | null;
+  dsr_minutos: number | null;
   observacao: string | null;
+  local_id: string | null;
 }
 
 export interface Feriado {
@@ -37,6 +39,15 @@ export interface Feriado {
   data: string;
   nome: string;
   nacional: boolean;
+}
+
+export interface Local {
+  id: string;
+  usuario_id: string;
+  nome: string;
+  cor: string;
+  ativo: boolean;
+  criado_em: string;
 }
 
 export type TipoBatida = 'entrada' | 'saida_almoco' | 'retorno_almoco' | 'saida_final';

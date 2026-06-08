@@ -103,3 +103,76 @@ export function calcularJornada(
   const almocoF = dayjs(`2000-01-01T${almocoFim}`);
   return Math.max(0, fim.diff(inicio, 'minute') - almocoF.diff(almocoI, 'minute'));
 }
+
+const diasSemanaMap = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+
+export function detectarAusencias(
+  entries: RegistroPonto[],
+  anoMes: string,
+  diasTrabalho: number[]
+): string[] {
+  const inicio = dayjs(anoMes, 'YYYY-MM').startOf('month');
+  const fim = dayjs(anoMes, 'YYYY-MM').endOf('month');
+  const hoje = dayjs().startOf('day');
+  const datasComRegistro = new Set(entries.map((e) => e.data));
+  const ausencias: string[] = [];
+
+  let atual = inicio;
+  while (atual.isBefore(fim) || atual.isSame(fim, 'day')) {
+    if (atual.isBefore(hoje) && diasTrabalho.includes(atual.day())) {
+      const dataStr = atual.format('YYYY-MM-DD');
+      if (!datasComRegistro.has(dataStr)) {
+        ausencias.push(dataStr);
+      }
+    }
+    atual = atual.add(1, 'day');
+  }
+
+  return ausencias;
+}
+
+export function verificarExcedente(
+  totalMinutos: number,
+  jornadaMinutos: number
+): { excedente: boolean; minutos: number; percentual: number | null } {
+  const excedente = totalMinutos > jornadaMinutos;
+  if (!excedente) return { excedente: false, minutos: 0, percentual: null };
+
+  const minutos = totalMinutos - jornadaMinutos;
+  const percentual = minutos <= 120 ? 50 : 100;
+  return { excedente: true, minutos, percentual };
+}
+
+export function calcularDSR(heMinutos: number, diasUteisMes: number): number {
+  if (heMinutos <= 0 || diasUteisMes <= 0) return 0;
+  return Math.floor((heMinutos * diasUteisMes) / 6);
+}
+
+export function gerarCSV(entries: RegistroPonto[]): string {
+  const cabecalho = 'Data,Dia Semana,Entrada,Saída Almoço,Retorno Almoço,Saída Final,Total,Saldo,Observação';
+  const linhas = entries.map((e) => {
+    const data = dayjs(e.data);
+    return [
+      e.data,
+      diasSemanaMap[data.day()],
+      e.entrada ? dayjs(e.entrada).format('HH:mm') : '',
+      e.saida_almoco ? dayjs(e.saida_almoco).format('HH:mm') : '',
+      e.retorno_almoco ? dayjs(e.retorno_almoco).format('HH:mm') : '',
+      e.saida_final ? dayjs(e.saida_final).format('HH:mm') : '',
+      e.total_minutos ?? '',
+      e.saldo_minutos ?? '',
+      (e.observacao || '').replace(/,/g, ';'),
+    ].join(',');
+  });
+  return [cabecalho, ...linhas].join('\n');
+}
+
+export function downloadCSV(conteudo: string, nomeArquivo: string) {
+  const blob = new Blob([conteudo], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = nomeArquivo;
+  link.click();
+  URL.revokeObjectURL(url);
+}

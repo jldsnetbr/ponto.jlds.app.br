@@ -3,7 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import dayjs from 'dayjs';
 import { useRegistrosPonto } from '@/hooks/useRegistrosPonto';
 import { useAlterarPonto } from '@/hooks/useMutacoesPonto';
-import { calcularDia } from '@/lib/calculos';
+import { calcularDia, gerarCSV, downloadCSV } from '@/lib/calculos';
 import { formatarMinutos, cn } from '@/lib/utilitarios';
 import { useConfiguracoes } from '@/hooks/useConfiguracoes';
 import { useToast, Card, Button, Input, Spinner } from '@/components/ui';
@@ -91,6 +91,16 @@ export function HistoryPage() {
     );
   };
 
+  const handleExportarCSV = () => {
+    if (!entries || entries.length === 0) {
+      showToast('Nenhum registro para exportar', 'info');
+      return;
+    }
+    const csv = gerarCSV(entries);
+    downloadCSV(csv, `pontos-${anoMes}.csv`);
+    showToast('CSV exportado com sucesso', 'success');
+  };
+
   return (
     <div className="flex flex-col gap-4 p-4">
       <div className="flex items-center justify-between">
@@ -98,6 +108,13 @@ export function HistoryPage() {
         <h2 className="text-lg font-semibold text-slate-100 capitalize">{labelMes}</h2>
         <button onClick={mesSeguinte} className="min-h-[44px] min-w-[44px] flex items-center justify-center text-slate-400 text-lg hover:text-slate-200" aria-label="Próximo mês">→</button>
       </div>
+
+      <button
+        onClick={handleExportarCSV}
+        className="self-end text-sm text-slate-400 hover:text-slate-200 min-h-[44px] min-w-[44px] flex items-center justify-center"
+      >
+        Exportar CSV
+      </button>
 
       {isLoading ? <Spinner /> : (
         <div className="flex flex-col gap-2">

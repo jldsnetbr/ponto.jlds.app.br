@@ -3,6 +3,7 @@ import { supabase } from '@/lib/supabase';
 import { useAutenticacao } from './useAutenticacao';
 import { useConfiguracoes } from './useConfiguracoes';
 import { recalcularESalvar } from '@/lib/calculos';
+import { adicionarPendente } from '@/lib/offlineQueue';
 import type { RegistroPonto, TipoBatida } from '@/types';
 import dayjs from 'dayjs';
 
@@ -15,6 +16,18 @@ export function useBaterPonto() {
   return useMutation({
     mutationFn: async ({ entry, tipo, horario }: { entry: RegistroPonto | null; tipo: TipoBatida; horario?: string }) => {
       const agora = horario || new Date().toISOString();
+
+      // Se offline, salvar na fila
+      if (!navigator.onLine) {
+        await adicionarPendente({
+          usuario_id: usuario!.id,
+          data: hoje,
+          tipo,
+          horario: agora,
+          entry_id: entry?.id,
+        });
+        return { offline: true } as unknown as RegistroPonto;
+      }
 
       if (!entry) {
         const { data, error } = await supabase
@@ -36,6 +49,10 @@ export function useBaterPonto() {
       return data as RegistroPonto;
     },
     onSuccess: async (entry) => {
+      if ((entry as any)?.offline) {
+        queryClient.invalidateQueries({ queryKey: ['pontos'] });
+        return;
+      }
       try {
         await recalcularESalvar(entry, config);
       } catch (err) {

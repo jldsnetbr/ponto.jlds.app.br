@@ -5,18 +5,22 @@ import dayjs from 'dayjs';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { PunchPage } from './PunchPage';
 import { ToastProvider } from '@/components/ui';
-import { useRegistroHoje } from '@/hooks/useRegistrosPonto';
+import { useRegistroHoje, useRegistrosPonto } from '@/hooks/useRegistrosPonto';
 import { useBaterPonto, useAlterarPonto } from '@/hooks/useMutacoesPonto';
 import { useConfiguracoes } from '@/hooks/useConfiguracoes';
+import { useLocais } from '@/hooks/useLocais';
 
 vi.mock('@/hooks/useRegistrosPonto');
 vi.mock('@/hooks/useMutacoesPonto');
 vi.mock('@/hooks/useConfiguracoes');
+vi.mock('@/hooks/useLocais');
 
 const mockUseRegistroHoje = useRegistroHoje as unknown as ReturnType<typeof vi.fn>;
+const mockUseRegistrosPonto = useRegistrosPonto as unknown as ReturnType<typeof vi.fn>;
 const mockUseBaterPonto = useBaterPonto as unknown as ReturnType<typeof vi.fn>;
 const mockUseAlterarPonto = useAlterarPonto as unknown as ReturnType<typeof vi.fn>;
 const mockUseConfiguracoes = useConfiguracoes as unknown as ReturnType<typeof vi.fn>;
+const mockUseLocais = useLocais as unknown as ReturnType<typeof vi.fn>;
 
 const queryClient = new QueryClient();
 
@@ -24,9 +28,11 @@ describe('PunchPage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockUseRegistroHoje.mockReturnValue({ data: null, isLoading: false });
+    mockUseRegistrosPonto.mockReturnValue({ data: [], isLoading: false });
     mockUseBaterPonto.mockReturnValue({ mutate: vi.fn(), isPending: false });
     mockUseAlterarPonto.mockReturnValue({ mutate: vi.fn(), isPending: false });
     mockUseConfiguracoes.mockReturnValue({ data: { jornada_minutos: 480 }, isLoading: false });
+    mockUseLocais.mockReturnValue({ data: [], isLoading: false });
   });
 
   const renderComponent = () =>
