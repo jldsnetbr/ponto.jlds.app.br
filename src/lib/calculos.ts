@@ -1,5 +1,6 @@
 import dayjs from 'dayjs';
-import type { TipoBatida } from '@/types';
+import { supabase } from '@/lib/supabase';
+import type { TipoBatida, RegistroPonto, ConfiguracoesUsuario } from '@/types';
 
 const TOLERANCIA = 5;
 
@@ -66,6 +67,28 @@ export function calcularTempoDecorrido(
   else if (e2) total += agora.diff(e2, 'minute');
 
   return total;
+}
+
+export async function recalcularESalvar(
+  entry: RegistroPonto,
+  config: ConfiguracoesUsuario | undefined
+): Promise<void> {
+  if (!config) return;
+
+  const { totalMinutos, saldoMinutos } = calcularDia(
+    entry.entrada,
+    entry.saida_almoco,
+    entry.retorno_almoco,
+    entry.saida_final,
+    config.jornada_minutos
+  );
+
+  const { error } = await supabase
+    .from('pontos')
+    .update({ total_minutos: totalMinutos, saldo_minutos: saldoMinutos })
+    .eq('id', entry.id);
+
+  if (error) throw error;
 }
 
 export function calcularJornada(

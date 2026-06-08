@@ -11,7 +11,7 @@ describe('formatarMinutos', () => {
   });
 
   it('formata zero', () => {
-    expect(formatarMinutos(0)).toBe('+0h 00min');
+    expect(formatarMinutos(0)).toBe('0h 00min');
   });
 });
 

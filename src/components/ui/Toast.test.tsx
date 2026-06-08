@@ -28,7 +28,7 @@ describe('Toast', () => {
 
     await userEvent.click(screen.getByText('Mostrar Toast'));
     const toast = screen.getByText('Mensagem de teste');
-    expect(toast).toHaveClass('bg-green-500');
+    expect(toast).toHaveClass('bg-emerald-600');
   });
 
   it('lança erro se useToast usado fora do provider', () => {

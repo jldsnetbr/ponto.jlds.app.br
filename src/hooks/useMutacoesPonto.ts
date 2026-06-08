@@ -2,7 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { useAutenticacao } from './useAutenticacao';
 import { useConfiguracoes } from './useConfiguracoes';
-import { recalcularESalvar } from '@/lib/recalculateDay';
+import { recalcularESalvar } from '@/lib/calculos';
 import type { RegistroPonto, TipoBatida } from '@/types';
 import dayjs from 'dayjs';
 
@@ -36,7 +36,11 @@ export function useBaterPonto() {
       return data as RegistroPonto;
     },
     onSuccess: async (entry) => {
-      await recalcularESalvar(entry, config);
+      try {
+        await recalcularESalvar(entry, config);
+      } catch (err) {
+        console.error('[RECALCULAR ERRO]', err);
+      }
       queryClient.invalidateQueries({ queryKey: ['pontos'] });
     },
   });
@@ -58,7 +62,11 @@ export function useAlterarPonto() {
       return data as RegistroPonto;
     },
     onSuccess: async (entry) => {
-      await recalcularESalvar(entry, config);
+      try {
+        await recalcularESalvar(entry, config);
+      } catch (err) {
+        console.error('[RECALCULAR ERRO]', err);
+      }
       queryClient.invalidateQueries({ queryKey: ['pontos'] });
     },
   });

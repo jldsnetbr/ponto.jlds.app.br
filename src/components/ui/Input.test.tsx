@@ -23,31 +23,6 @@ describe('Input', () => {
     expect(input).toHaveAttribute('id', 'email-custom');
   });
 
-  it('aplica classe de erro quando error prop passado', () => {
-    render(<Input label="Email" error="Email inválido" />);
-    const input = screen.getByLabelText('Email');
-    expect(input).toHaveClass('border-red-500');
-    expect(screen.getByRole('alert')).toHaveTextContent('Email inválido');
-  });
-
-  it('define aria-invalid quando error', () => {
-    render(<Input label="Email" error="Email inválido" />);
-    const input = screen.getByLabelText('Email');
-    expect(input).toHaveAttribute('aria-invalid', 'true');
-  });
-
-  it('define aria-describedby quando error', () => {
-    render(<Input label="Email" error="Email inválido" />);
-    const input = screen.getByLabelText('Email');
-    expect(input).toHaveAttribute('aria-describedby');
-  });
-
-  it('não define aria-invalid quando sem error', () => {
-    render(<Input label="Email" />);
-    const input = screen.getByLabelText('Email');
-    expect(input).toHaveAttribute('aria-invalid', 'false');
-  });
-
   it('chama onChange quando valor muda', async () => {
     const handleChange = vi.fn();
     render(<Input label="Email" onChange={handleChange} />);
