@@ -9,15 +9,15 @@ export function BarraProgresso({ progress }: BarraProgressoProps) {
 
   return (
     <div className="w-full" role="progressbar" aria-valuenow={Math.round(clampedProgress)} aria-valuemin={0} aria-valuemax={100} aria-label="Progresso da jornada">
-      <div className="flex justify-between text-xs text-gray-500 mb-1">
+      <div className="flex justify-between text-xs text-slate-400 mb-1">
         <span>Progresso da jornada</span>
         <span>{Math.round(clampedProgress)}%</span>
       </div>
-      <div className="w-full h-3 bg-gray-200 rounded-full overflow-hidden">
+      <div className="w-full h-3 bg-midnight-800/60 rounded-full overflow-hidden">
         <div
           className={cn(
             'h-full rounded-full transition-all duration-500',
-            clampedProgress >= 100 ? 'bg-green-500' : 'bg-blue-500'
+            clampedProgress >= 100 ? 'bg-emerald-500' : 'bg-midnight-400'
           )}
           style={{ width: `${clampedProgress}%` }}
         />

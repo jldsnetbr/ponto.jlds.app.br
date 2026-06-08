@@ -18,7 +18,7 @@ function NavItem({ to, icon, label }: NavItemProps) {
       onClick={() => navigate(to)}
       className={cn(
         'flex flex-col items-center justify-center p-2 rounded-lg transition-colors',
-        isActive ? 'text-blue-600 bg-blue-50' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+        isActive ? 'text-midnight-400 bg-midnight-800/50' : 'text-slate-400 hover:text-slate-200 hover:bg-midnight-800/30'
       )}
       aria-current={isActive ? 'page' : undefined}
       aria-label={label}
@@ -31,9 +31,9 @@ function NavItem({ to, icon, label }: NavItemProps) {
 
 export function BottomNav() {
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 shadow-md p-2 flex justify-around">
-      <NavItem to={ROTAS.PONTO} icon="⏱️" label="Ponto" />
+    <nav className="fixed bottom-0 left-0 right-0 bg-surface-dark backdrop-blur-sm border-t border-midnight-400/20 shadow-lg p-2 flex justify-around">
       <NavItem to={ROTAS.BANCO} icon="🏦" label="Banco" />
+      <NavItem to={ROTAS.PONTO} icon="⏱️" label="Ponto" />
       <NavItem to={ROTAS.HISTORICO} icon="🗓️" label="Histórico" />
     </nav>
   );

@@ -95,7 +95,7 @@ export function SettingsPage() {
   return (
     <div className="flex flex-col gap-6 p-4 pb-8">
       <Card className="flex flex-col gap-4">
-        <h3 className="text-base font-semibold text-gray-900">Horários</h3>
+        <h3 className="text-base font-semibold text-slate-100">Horários</h3>
         <div className="grid grid-cols-2 gap-3">
           <TimePicker label="Entrada" value={inicioExpediente} onChange={setInicioExpediente} />
           <TimePicker label="Saída" value={fimExpediente} onChange={setFimExpediente} />
@@ -105,14 +105,14 @@ export function SettingsPage() {
       </Card>
 
       <Card className="flex flex-col gap-3">
-        <h3 className="text-base font-semibold text-gray-900">Dias Trabalhados</h3>
+        <h3 className="text-base font-semibold text-slate-100">Dias Trabalhados</h3>
         <div className="flex flex-wrap gap-2">
           {diasLabels.map((label, index) => (
             <button
               key={index}
               onClick={() => toggleDia(index)}
               className={`px-3 py-2 rounded-lg text-sm font-medium min-h-[44px] min-w-[44px] transition-colors ${
-                diasTrabalho.includes(index) ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-600'
+                diasTrabalho.includes(index) ? 'bg-midnight-500 text-white' : 'bg-midnight-800/50 text-slate-400 border border-midnight-400/20'
               }`}
             >
               {label}
@@ -122,12 +122,12 @@ export function SettingsPage() {
       </Card>
 
       <Card className="flex flex-col gap-3">
-        <h3 className="text-base font-semibold text-gray-900">Notificações</h3>
+        <h3 className="text-base font-semibold text-slate-100">Notificações</h3>
         <div className="flex items-center justify-between">
-          <span className="text-sm text-gray-700">Ativar notificações</span>
+          <span className="text-sm text-slate-300">Ativar notificações</span>
           <button
             onClick={handleToggleNotificacoes}
-            className={`w-12 h-7 rounded-full transition-colors ${notificacoesAtivas ? 'bg-blue-500' : 'bg-gray-300'}`}
+            className={`w-12 h-7 rounded-full transition-colors ${notificacoesAtivas ? 'bg-midnight-500' : 'bg-midnight-800/50 border border-midnight-400/20'}`}
           >
             <div className={`w-5 h-5 rounded-full bg-white shadow transition-transform ${notificacoesAtivas ? 'translate-x-6' : 'translate-x-1'}`} />
           </button>
@@ -139,14 +139,14 @@ export function SettingsPage() {
 
       <Card className="flex flex-col gap-3">
         <div className="flex items-center justify-between">
-          <h3 className="text-base font-semibold text-gray-900">Feriados</h3>
-          <button onClick={() => setShowAddFeriado(!showAddFeriado)} className="text-blue-500 text-sm font-medium min-h-[44px] min-w-[44px] flex items-center justify-center">
+          <h3 className="text-base font-semibold text-slate-100">Feriados</h3>
+          <button onClick={() => setShowAddFeriado(!showAddFeriado)} className="text-midnight-400 text-sm font-medium min-h-[44px] min-w-[44px] flex items-center justify-center">
             + Adicionar
           </button>
         </div>
 
         {showAddFeriado && (
-          <div className="flex flex-col gap-2 p-3 bg-gray-50 rounded-lg">
+          <div className="flex flex-col gap-2 p-3 bg-midnight-800/40 rounded-lg border border-midnight-400/20">
             <Input label="Data" type="date" value={novoFeriadoData} onChange={(e) => setNovoFeriadoData(e.target.value)} />
             <Input label="Nome" type="text" value={novoFeriadoNome} onChange={(e) => setNovoFeriadoNome(e.target.value)} placeholder="Ex: Aniversário da cidade" />
             <Button size="sm" onClick={handleAddFeriado} disabled={!novoFeriadoData || !novoFeriadoNome.trim()}>
@@ -157,10 +157,10 @@ export function SettingsPage() {
 
         {feriadosNacionais.length > 0 && (
           <div className="flex flex-col gap-1">
-            <p className="text-xs font-medium text-gray-500 uppercase">Nacionais</p>
+            <p className="text-xs font-medium text-slate-500 uppercase">Nacionais</p>
             {feriadosNacionais.map((h) => (
               <div key={h.id} className="flex items-center justify-between py-1">
-                <span className="text-sm text-gray-700">{dayjs(h.data).format('DD/MM')} - {h.nome}</span>
+                <span className="text-sm text-slate-300">{dayjs(h.data).format('DD/MM')} - {h.nome}</span>
               </div>
             ))}
           </div>
@@ -168,11 +168,11 @@ export function SettingsPage() {
 
         {feriadosPessoais.length > 0 && (
           <div className="flex flex-col gap-1">
-            <p className="text-xs font-medium text-gray-500 uppercase">Personalizados</p>
+            <p className="text-xs font-medium text-slate-500 uppercase">Personalizados</p>
             {feriadosPessoais.map((h) => (
               <div key={h.id} className="flex items-center justify-between py-1">
-                <span className="text-sm text-gray-700">{dayjs(h.data).format('DD/MM')} - {h.nome}</span>
-                <button onClick={() => delFeriado.mutate(h.id)} className="text-red-500 text-sm min-h-[44px] min-w-[44px] flex items-center justify-center">
+                <span className="text-sm text-slate-300">{dayjs(h.data).format('DD/MM')} - {h.nome}</span>
+                <button onClick={() => delFeriado.mutate(h.id)} className="text-red-400 text-sm min-h-[44px] min-w-[44px] flex items-center justify-center">
                   Excluir
                 </button>
               </div>
@@ -185,7 +185,7 @@ export function SettingsPage() {
         {mutation.isPending ? 'Salvando...' : 'Salvar configurações'}
       </Button>
 
-      <button onClick={sair} className="text-center text-red-500 font-medium py-3 min-h-[44px]">
+      <button onClick={sair} className="text-center text-red-400 font-medium py-3 min-h-[44px]">
         Sair
       </button>
     </div>

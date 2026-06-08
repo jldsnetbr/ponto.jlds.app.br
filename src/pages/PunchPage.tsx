@@ -122,10 +122,10 @@ export function PunchPage() {
   return (
     <div className="flex flex-col items-center gap-6 p-4">
       <div className="text-center">
-        <p className="text-sm text-gray-500 capitalize">
+        <p className="text-sm text-slate-400 capitalize">
           {agora.format('dddd, DD [de] MMMM [de] YYYY')}
         </p>
-        <p className="text-4xl font-mono font-bold text-gray-900 mt-1">
+        <p className="text-4xl font-mono font-bold text-slate-100 mt-1">
           {agora.format('HH:mm:ss')}
         </p>
       </div>
@@ -137,7 +137,7 @@ export function PunchPage() {
       />
 
       <div className="w-full max-w-sm">
-        <p className="text-center text-lg font-medium text-gray-900">
+        <p className="text-center text-lg font-medium text-slate-200">
           Trabalhado hoje: {formatarMinutos(totalMinutos)}
         </p>
       </div>
@@ -147,7 +147,7 @@ export function PunchPage() {
       </div>
 
       <Card className="w-full max-w-sm">
-        <h3 className="text-sm font-semibold text-gray-700 mb-2">Batidas de hoje</h3>
+        <h3 className="text-sm font-semibold text-slate-300 mb-2">Batidas de hoje</h3>
         <StatusHoje
           entry={entry || null}
           onEdit={handleEdit}
@@ -169,7 +169,7 @@ export function PunchPage() {
         title="Remover batida"
       >
         <div className="flex flex-col items-center gap-4 py-2">
-          <p className="text-gray-600 text-center">
+          <p className="text-slate-300 text-center">
             Tem certeza que deseja remover esta batida?
           </p>
           <div className="flex gap-3 w-full mt-2">

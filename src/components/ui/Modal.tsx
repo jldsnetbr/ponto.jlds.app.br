@@ -55,13 +55,13 @@ export function Modal({ open, onClose, title, children }: ModalProps) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4"
       onClick={onClose}
       role="presentation"
     >
       <div
         ref={modalRef}
-        className="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6"
+        className="bg-surface backdrop-blur-md rounded-2xl shadow-2xl w-full max-w-sm p-6 border border-midnight-400/20"
         onClick={(e) => e.stopPropagation()}
         role="dialog"
         aria-modal="true"
@@ -69,10 +69,10 @@ export function Modal({ open, onClose, title, children }: ModalProps) {
         tabIndex={-1}
       >
         <div className="flex items-center justify-between mb-4">
-          <h2 id="modal-title" className="text-lg font-semibold text-gray-900">{title}</h2>
+          <h2 id="modal-title" className="text-lg font-semibold text-slate-100">{title}</h2>
           <button
             onClick={onClose}
-            className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-600 text-xl rounded-full hover:bg-gray-100"
+            className="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-slate-200 text-xl rounded-full hover:bg-midnight-800/50"
             aria-label="Fechar"
           >
             ×

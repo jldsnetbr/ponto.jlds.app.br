@@ -28,7 +28,7 @@ export function PunchButton({ nextPunchType, onPunch, disabled }: PunchButtonPro
         className={cn(
           'w-48 h-48 rounded-full font-bold text-xl text-white shadow-lg transition-all active:scale-95',
           'flex flex-col items-center justify-center gap-2',
-          completo ? 'bg-gray-300 cursor-not-allowed' : 'bg-blue-500 active:bg-blue-600',
+          completo ? 'bg-slate-700 cursor-not-allowed' : 'bg-midnight-500 active:bg-midnight-600 shadow-midnight-500/30',
           disabled && 'opacity-50'
         )}
         aria-label={completo ? 'Jornada completa' : `Bater ponto: ${nextPunchType ? labels[nextPunchType] : ''}`}
@@ -46,8 +46,8 @@ export function PunchButton({ nextPunchType, onPunch, disabled }: PunchButtonPro
         )}
       </button>
       {!completo && nextPunchType && (
-        <p className="text-sm text-gray-600">
-          Próxima batida: <span className="font-semibold">{labels[nextPunchType]}</span>
+        <p className="text-sm text-slate-400">
+          Próxima batida: <span className="font-semibold text-slate-200">{labels[nextPunchType]}</span>
         </p>
       )}
     </div>

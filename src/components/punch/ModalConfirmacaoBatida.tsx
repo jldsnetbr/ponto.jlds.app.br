@@ -27,7 +27,7 @@ export function ModalConfirmacaoBatida({ open, onClose, onConfirm, tipo }: Modal
   return (
     <Modal open={open} onClose={onClose} title="Confirmar Batida">
       <div className="flex flex-col items-center gap-4 py-2">
-        <p className="text-xl font-bold text-blue-600">
+        <p className="text-xl font-bold text-midnight-400">
           {tipo ? labels[tipo] : '---'}
         </p>
 
@@ -40,12 +40,12 @@ export function ModalConfirmacaoBatida({ open, onClose, onConfirm, tipo }: Modal
             type="time"
             value={horario}
             onChange={(e) => setHorario(e.target.value)}
-            className="text-5xl font-mono font-bold text-gray-900 text-center bg-transparent border-b-2 border-blue-500 focus:outline-none w-52 py-1 mx-auto"
+            className="text-5xl font-mono font-bold text-slate-100 text-center bg-transparent border-b-2 border-midnight-400 focus:outline-none w-52 py-1 mx-auto"
             autoFocus
           />
         </div>
 
-        <p className="text-sm text-gray-500 capitalize">
+        <p className="text-sm text-slate-400 capitalize">
           {dayjs().format('dddd, DD [de] MMMM [de] YYYY')}
         </p>
 

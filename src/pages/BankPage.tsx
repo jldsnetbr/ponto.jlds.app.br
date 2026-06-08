@@ -37,14 +37,14 @@ export function BankPage() {
   return (
     <div className="flex flex-col gap-4 p-4">
       <div className="flex items-center justify-between">
-        <button onClick={mesAnterior} className="min-h-[44px] min-w-[44px] flex items-center justify-center text-gray-600 text-lg" aria-label="Mês anterior">←</button>
-        <h2 className="text-lg font-semibold text-gray-900 capitalize">{labelMes}</h2>
-        <button onClick={mesSeguinte} className="min-h-[44px] min-w-[44px] flex items-center justify-center text-gray-600 text-lg" aria-label="Próximo mês">→</button>
+        <button onClick={mesAnterior} className="min-h-[44px] min-w-[44px] flex items-center justify-center text-slate-400 text-lg hover:text-slate-200" aria-label="Mês anterior">←</button>
+        <h2 className="text-lg font-semibold text-slate-100 capitalize">{labelMes}</h2>
+        <button onClick={mesSeguinte} className="min-h-[44px] min-w-[44px] flex items-center justify-center text-slate-400 text-lg hover:text-slate-200" aria-label="Próximo mês">→</button>
       </div>
 
-      <Card className={cn('text-center py-6', saldoMensal > 0 && 'bg-green-50 border-green-200', saldoMensal < 0 && 'bg-red-50 border-red-200')}>
-        <p className="text-sm text-gray-600 mb-1">Saldo do mês</p>
-        <p className={cn('text-3xl font-bold font-mono', saldoMensal > 0 && 'text-green-600', saldoMensal < 0 && 'text-red-600', saldoMensal === 0 && 'text-gray-600')}>
+      <Card className={cn('text-center py-6', saldoMensal > 0 && 'border-emerald-500/30', saldoMensal < 0 && 'border-red-500/30')}>
+        <p className="text-sm text-slate-400 mb-1">Saldo do mês</p>
+        <p className={cn('text-3xl font-bold font-mono', saldoMensal > 0 && 'text-emerald-400', saldoMensal < 0 && 'text-red-400', saldoMensal === 0 && 'text-slate-400')}>
           {formatarMinutos(saldoMensal)}
         </p>
       </Card>
@@ -60,24 +60,24 @@ export function BankPage() {
                 <Card
                   key={dia.data}
                   onClick={() => { if (dia.entry) navigate(construirHistoricoComDia(dia.data)); }}
-                className={cn('flex items-center justify-between py-3', !dia.entry && 'opacity-50')}
+                className={cn('flex items-center justify-between py-3 cursor-pointer', !dia.entry && 'opacity-50')}
               >
                 <div className="flex items-center gap-3">
-                  <span className="text-xs text-gray-500 w-8">{dia.diaSemana}</span>
-                  <span className="text-sm font-medium text-gray-900 w-6">{dia.diaNum}</span>
+                  <span className="text-xs text-slate-500 w-8">{dia.diaSemana}</span>
+                  <span className="text-sm font-medium text-slate-200 w-6">{dia.diaNum}</span>
                 </div>
                 <div className="flex items-center gap-4">
                   {total !== null && total !== undefined ? (
-                    <span className="text-sm text-gray-600 font-mono">{formatarMinutos(total)}</span>
+                    <span className="text-sm text-slate-300 font-mono">{formatarMinutos(total)}</span>
                   ) : (
-                    <span className="text-sm text-gray-400">-</span>
+                    <span className="text-sm text-slate-600">-</span>
                   )}
                   {saldo !== null && saldo !== undefined ? (
-                    <span className={cn('text-sm font-mono font-medium w-20 text-right', saldoZero ? 'text-gray-400' : saldo > 0 ? 'text-green-600' : 'text-red-600')}>
+                    <span className={cn('text-sm font-mono font-medium w-20 text-right', saldoZero ? 'text-slate-500' : saldo > 0 ? 'text-emerald-400' : 'text-red-400')}>
                       {saldoZero ? formatarMinutos(0) : formatarMinutos(saldo)}
                     </span>
                   ) : (
-                    <span className="text-sm text-gray-400 w-20 text-right">-</span>
+                    <span className="text-sm text-slate-600 w-20 text-right">-</span>
                   )}
                 </div>
               </Card>

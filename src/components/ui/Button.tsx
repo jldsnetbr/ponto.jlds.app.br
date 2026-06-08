@@ -19,13 +19,13 @@ export function Button({
   const Comp = asChild ? Slot : 'button';
 
   const baseStyles = 
-    'inline-flex items-center justify-center rounded-lg font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none';
+    'inline-flex items-center justify-center rounded-lg font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-midnight-900 disabled:opacity-50 disabled:pointer-events-none';
 
   const variantStyles = {
-    primary: 'bg-blue-500 text-white hover:bg-blue-600 focus-visible:ring-blue-500',
-    secondary: 'bg-gray-200 text-gray-700 hover:bg-gray-300 focus-visible:ring-gray-500',
-    danger: 'bg-red-500 text-white hover:bg-red-600 focus-visible:ring-red-500',
-    ghost: 'hover:bg-gray-100 text-gray-700 focus-visible:ring-gray-500',
+    primary: 'bg-midnight-500 text-white hover:bg-midnight-600 focus-visible:ring-midnight-400',
+    secondary: 'bg-midnight-800/50 text-slate-200 hover:bg-midnight-700/50 border border-midnight-400/20 focus-visible:ring-midnight-400',
+    danger: 'bg-red-700 text-white hover:bg-red-600 focus-visible:ring-red-500',
+    ghost: 'hover:bg-midnight-800/30 text-slate-300 focus-visible:ring-midnight-400',
   };
 
   const sizeStyles = {

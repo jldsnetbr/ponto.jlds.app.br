@@ -32,9 +32,9 @@ export function AuthPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+    <div className="min-h-screen flex items-center justify-center px-4">
       <div className="w-full max-w-sm">
-        <h1 className="text-2xl font-bold text-center text-gray-900 mb-8">
+        <h1 className="text-2xl font-bold text-center text-slate-100 mb-8">
           Controle de Ponto
         </h1>
 
@@ -49,11 +49,11 @@ export function AuthPage() {
           />
 
           {erro && (
-            <p className="text-sm text-red-500 text-center">{erro}</p>
+            <p className="text-sm text-red-400 text-center">{erro}</p>
           )}
 
           {sucesso && (
-            <p className="text-sm text-green-600 text-center">
+            <p className="text-sm text-emerald-400 text-center">
               Verifique seu email e clique no link para entrar.
             </p>
           )}

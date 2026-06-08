@@ -10,7 +10,7 @@ export function Layout() {
   return (
     <div className="flex min-h-screen flex-col">
       <Header />
-      <main className="flex-1">
+      <main className="flex-1 pb-20">
         <Outlet />
       </main>
       <BottomNav />

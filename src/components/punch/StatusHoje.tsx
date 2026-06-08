@@ -23,7 +23,7 @@ export function StatusHoje({ entry, onEdit, onDelete, isPending }: StatusHojePro
   const [editando, setEditando] = useState<string | null>(null);
 
   if (!entry) {
-    return <p className="text-sm text-gray-500 text-center">Nenhuma batida registrada hoje</p>;
+    return <p className="text-sm text-slate-400 text-center">Nenhuma batida registrada hoje</p>;
   }
 
   const batidas: { tipo: TipoBatida; horario: string }[] = [];
@@ -61,20 +61,20 @@ export function StatusHoje({ entry, onEdit, onDelete, isPending }: StatusHojePro
             />
           ) : (
             <>
-              <span className="text-gray-600">{labels[batida.tipo]}</span>
+              <span className="text-slate-300">{labels[batida.tipo]}</span>
               <div className="flex items-center gap-1">
-                <span className="font-mono font-medium text-gray-900">
+                <span className="font-mono font-medium text-slate-100">
                   {dayjs(batida.horario).format('HH:mm')}
                 </span>
                 <button
                   onClick={() => iniciarEdicao(batida.tipo)}
-                  className="text-gray-400 hover:text-blue-500 min-h-[36px] min-w-[36px] flex items-center justify-center rounded-lg hover:bg-blue-50"
+                  className="text-slate-500 hover:text-midnight-400 min-h-[36px] min-w-[36px] flex items-center justify-center rounded-lg hover:bg-midnight-800/50"
                   aria-label={`Editar ${labels[batida.tipo]}`}
                 >✎</button>
                 <button
                   onClick={() => onDelete(entry.id, batida.tipo)}
                   disabled={isPending}
-                  className="text-gray-400 hover:text-red-500 min-h-[36px] min-w-[36px] flex items-center justify-center rounded-lg hover:bg-red-50 disabled:opacity-30"
+                  className="text-slate-500 hover:text-red-400 min-h-[36px] min-w-[36px] flex items-center justify-center rounded-lg hover:bg-red-900/30 disabled:opacity-30"
                   aria-label={`Remover ${labels[batida.tipo]}`}
                 >🗑</button>
               </div>
