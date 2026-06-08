@@ -1,16 +1,16 @@
 import { useEffect, useState } from 'react';
 import dayjs from 'dayjs';
 import 'dayjs/locale/pt-br';
-import { useRegistroHoje } from '@/hooks/useTimeEntries';
-import { useBaterPonto, useAlterarPonto } from '@/hooks/usePunchMutations';
-import { useConfiguracoes } from '@/hooks/useSettings';
-import { proximoTipoBatida, calcularTempoDecorrido } from '@/lib/calculations';
-import { formatarMinutos } from '@/lib/utils';
+import { useRegistroHoje } from '@/hooks/useRegistrosPonto';
+import { useBaterPonto, useAlterarPonto } from '@/hooks/useMutacoesPonto';
+import { useConfiguracoes } from '@/hooks/useConfiguracoes';
+import { proximoTipoBatida, calcularTempoDecorrido } from '@/lib/calculos';
+import { formatarMinutos } from '@/lib/utilitarios';
 import { useToast, Card, Button, Spinner } from '@/components/ui';
 import { PunchButton } from '@/components/punch/PunchButton';
-import { TodayStatus } from '@/components/punch/TodayStatus';
-import { ProgressBar } from '@/components/punch/ProgressBar';
-import { ConfirmPunchModal } from '@/components/punch/ConfirmPunchModal';
+import { StatusHoje } from '@/components/punch/StatusHoje';
+import { BarraProgresso } from '@/components/punch/BarraProgresso';
+import { ModalConfirmacaoBatida } from '@/components/punch/ModalConfirmacaoBatida';
 import { Modal } from '@/components/ui/Modal';
 import type { TipoBatida } from '@/types';
 
@@ -67,7 +67,7 @@ export function PunchPage() {
           showToast(`${labels[tipoPendente]} registrada às ${horario}`, 'success');
         },
         onError: (err) => {
-          console.error('[PUNCH ERRO]', err);
+          console.error('[PONTO ERRO]', err);
           showToast((err as any)?.message || 'Erro ao registrar ponto', 'error');
         },
       }
@@ -81,7 +81,7 @@ export function PunchPage() {
       {
         onSuccess: () => showToast('Batida atualizada', 'success'),
         onError: (err) => {
-          console.error('[EDIT ERRO]', err);
+          console.error('[EDICAO ERRO]', err);
           showToast((err as any)?.message || 'Erro ao atualizar batida', 'error');
         },
       }
@@ -107,7 +107,7 @@ export function PunchPage() {
           showToast(`${labels[deleteConfirm.tipo]} removida`, 'success');
         },
         onError: (err) => {
-          console.error('[DELETE ERRO]', err);
+          console.error('[EXCLUSAO ERRO]', err);
           showToast((err as any)?.message || 'Erro ao remover batida', 'error');
         },
       }
@@ -143,12 +143,12 @@ export function PunchPage() {
       </div>
 
       <div className="w-full max-w-sm">
-        <ProgressBar progress={progresso} />
+        <BarraProgresso progress={progresso} />
       </div>
 
       <Card className="w-full max-w-sm">
         <h3 className="text-sm font-semibold text-gray-700 mb-2">Batidas de hoje</h3>
-        <TodayStatus
+        <StatusHoje
           entry={entry || null}
           onEdit={handleEdit}
           onDelete={handleDelete}
@@ -156,7 +156,7 @@ export function PunchPage() {
         />
       </Card>
 
-      <ConfirmPunchModal
+      <ModalConfirmacaoBatida
         open={showModal}
         onClose={() => { setShowModal(false); setTipoPendente(null); }}
         onConfirm={handleConfirmPunch}

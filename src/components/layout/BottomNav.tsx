@@ -1,35 +1,40 @@
 import { useLocation, useNavigate } from 'react-router-dom';
-import { cn } from '@/lib/utils';
+import { cn } from '@/lib/utilitarios';
+import { ROTAS } from '@/lib/rotas';
 
-const abas = [
-  { path: '/banco', label: 'Banco' },
-  { path: '/ponto', label: 'Ponto' },
-  { path: '/historico', label: 'Histórico' },
-] as const;
+interface NavItemProps {
+  to: string;
+  icon: React.ReactNode;
+  label: string;
+}
 
-export function BottomNav() {
-  const location = useLocation();
+function NavItem({ to, icon, label }: NavItemProps) {
   const navigate = useNavigate();
+  const { pathname } = useLocation();
+  const isActive = pathname === to || (to === ROTAS.PONTO && pathname === '/');
 
   return (
-    <nav className="flex items-center justify-around bg-white border-t border-gray-100 px-2 pb-safe">
-      {abas.map((aba) => {
-        const ativo = location.pathname === aba.path;
-        return (
-          <button
-            key={aba.path}
-            onClick={() => navigate(aba.path)}
-            className={cn(
-              'flex flex-col items-center py-2 px-4 min-h-[44px] min-w-[44px] transition-colors',
-              ativo ? 'text-blue-500' : 'text-gray-400'
-            )}
-            aria-label={aba.label}
-            aria-current={ativo ? 'page' : undefined}
-          >
-            <span className="text-xs font-medium">{aba.label}</span>
-          </button>
-        );
-      })}
+    <button
+      onClick={() => navigate(to)}
+      className={cn(
+        'flex flex-col items-center justify-center p-2 rounded-lg transition-colors',
+        isActive ? 'text-blue-600 bg-blue-50' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+      )}
+      aria-current={isActive ? 'page' : undefined}
+      aria-label={label}
+    >
+      {icon}
+      <span className="text-xs mt-1">{label}</span>
+    </button>
+  );
+}
+
+export function BottomNav() {
+  return (
+    <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 shadow-md p-2 flex justify-around">
+      <NavItem to={ROTAS.PONTO} icon="⏱️" label="Ponto" />
+      <NavItem to={ROTAS.BANCO} icon="🏦" label="Banco" />
+      <NavItem to={ROTAS.HISTORICO} icon="🗓️" label="Histórico" />
     </nav>
   );
 }

@@ -1,47 +1,30 @@
 import { useState, type FormEvent } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '@/hooks/useAuth';
+import { useAutenticacao } from '@/hooks/useAutenticacao';
 import { Button, Input } from '@/components/ui';
 
 export function AuthPage() {
-  const [mode, setMode] = useState<'login' | 'register'>('login');
   const [email, setEmail] = useState('');
-  const [senha, setSenha] = useState('');
-  const [confirmSenha, setConfirmSenha] = useState('');
   const [erro, setErro] = useState('');
+  const [sucesso, setSucesso] = useState(false);
   const [carregando, setCarregando] = useState(false);
-  const { entrar, cadastrar } = useAuth();
-  const navigate = useNavigate();
+  const { entrar } = useAutenticacao();
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setErro('');
+    setSucesso(false);
 
-    if (!email.trim() || !senha) {
-      setErro('Preencha todos os campos');
-      return;
-    }
-
-    if (mode === 'register' && senha !== confirmSenha) {
-      setErro('As senhas não coincidem');
-      return;
-    }
-
-    if (senha.length < 6) {
-      setErro('Senha deve ter no mínimo 6 caracteres');
+    if (!email.trim()) {
+      setErro('Preencha o email');
       return;
     }
 
     setCarregando(true);
     try {
-      if (mode === 'login') {
-        await entrar(email, senha);
-      } else {
-        await cadastrar(email, senha);
-      }
-      navigate('/ponto');
+      await entrar(email);
+      setSucesso(true);
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Erro na autenticação';
+      const msg = err instanceof Error ? err.message : 'Erro ao enviar link';
       setErro(msg);
     } finally {
       setCarregando(false);
@@ -65,60 +48,20 @@ export function AuthPage() {
             autoComplete="email"
           />
 
-          <Input
-            label="Senha"
-            type="password"
-            value={senha}
-            onChange={(e) => setSenha(e.target.value)}
-            placeholder="Mínimo 6 caracteres"
-            autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
-          />
-
-          {mode === 'register' && (
-            <Input
-              label="Confirmar senha"
-              type="password"
-              value={confirmSenha}
-              onChange={(e) => setConfirmSenha(e.target.value)}
-              placeholder="Repita a senha"
-              autoComplete="new-password"
-            />
-          )}
-
           {erro && (
             <p className="text-sm text-red-500 text-center">{erro}</p>
           )}
 
+          {sucesso && (
+            <p className="text-sm text-green-600 text-center">
+              Verifique seu email e clique no link para entrar.
+            </p>
+          )}
+
           <Button type="submit" fullWidth disabled={carregando}>
-            {carregando ? 'Carregando...' : mode === 'login' ? 'Entrar' : 'Criar conta'}
+            {carregando ? 'Carregando...' : 'Receber link de acesso'}
           </Button>
         </form>
-
-        <p className="text-sm text-center text-gray-600 mt-4">
-          {mode === 'login' ? (
-            <>
-              Não tem conta?{' '}
-              <button
-                type="button"
-                onClick={() => { setMode('register'); setErro(''); }}
-                className="text-blue-500 font-medium"
-              >
-                Cadastre-se
-              </button>
-            </>
-          ) : (
-            <>
-              Já tem conta?{' '}
-              <button
-                type="button"
-                onClick={() => { setMode('login'); setErro(''); }}
-                className="text-blue-500 font-medium"
-              >
-                Faça login
-              </button>
-            </>
-          )}
-        </p>
       </div>
     </div>
   );

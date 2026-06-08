@@ -5,3 +5,5 @@ export { TimePicker } from './TimePicker';
 export { ToastProvider, useToast } from './Toast';
 export { Modal } from './Modal';
 export { Spinner } from './Spinner';
+export { OfflineBanner } from './OfflineBanner';
+export { InlineTimeEditor } from './InlineTimeEditor';

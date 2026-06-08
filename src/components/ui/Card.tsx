@@ -1,22 +1,17 @@
-import { cn } from '@/lib/utils';
+import { cn } from '@/lib/utilitarios';
 
-interface CardProps {
+interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode;
-  className?: string;
-  onClick?: () => void;
 }
 
-export function Card({ children, className, onClick }: CardProps) {
+export function Card({ className, children, ...props }: CardProps) {
   return (
     <div
       className={cn(
-        'bg-white rounded-xl shadow-sm border border-gray-100 p-4',
-        onClick && 'cursor-pointer active:bg-gray-50',
+        'rounded-xl border border-gray-200 bg-white p-4 shadow-sm',
         className
       )}
-      onClick={onClick}
-      role={onClick ? 'button' : undefined}
-      tabIndex={onClick ? 0 : undefined}
+      {...props}
     >
       {children}
     </div>

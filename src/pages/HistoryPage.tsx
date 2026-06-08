@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import dayjs from 'dayjs';
-import { useRegistrosPonto } from '@/hooks/useTimeEntries';
-import { useAlterarPonto } from '@/hooks/usePunchMutations';
-import { calcularDia } from '@/lib/calculations';
-import { formatarMinutos, cn } from '@/lib/utils';
-import { useConfiguracoes } from '@/hooks/useSettings';
+import { useRegistrosPonto } from '@/hooks/useRegistrosPonto';
+import { useAlterarPonto } from '@/hooks/useMutacoesPonto';
+import { calcularDia } from '@/lib/calculos';
+import { formatarMinutos, cn } from '@/lib/utilitarios';
+import { useConfiguracoes } from '@/hooks/useConfiguracoes';
 import { useToast, Card, Button, Input, Spinner } from '@/components/ui';
 import type { RegistroPonto } from '@/types';
 
@@ -70,7 +70,7 @@ export function HistoryPage() {
       {
         onSuccess: () => showToast('Alterações salvas', 'success'),
         onError: (err) => {
-          console.error('[HISTORY ERRO]', err);
+          console.error('[HISTORICO ERRO]', err);
           showToast((err as any)?.message || 'Erro ao salvar alterações', 'error');
         },
       }
@@ -78,15 +78,15 @@ export function HistoryPage() {
   };
 
   const getCalculoEditado = (entry: RegistroPonto) => {
-    const paraData = (horario: string) => {
+    const paraISO = (horario: string) => {
       if (!horario) return null;
-      return dayjs(`${entry.data}T${horario}`).toDate();
+      return dayjs(`${entry.data}T${horario}`).toISOString();
     };
     return calcularDia(
-      paraData(editValues.entrada),
-      paraData(editValues.saida_almoco),
-      paraData(editValues.retorno_almoco),
-      paraData(editValues.saida_final),
+      paraISO(editValues.entrada),
+      paraISO(editValues.saida_almoco),
+      paraISO(editValues.retorno_almoco),
+      paraISO(editValues.saida_final),
       config?.jornada_minutos ?? 480
     );
   };

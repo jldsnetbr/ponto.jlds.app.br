@@ -1,65 +1,129 @@
-import { render, screen } from '@testing-library/react';
-import { describe, it, expect, vi } from 'vitest';
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { vi } from 'vitest';
+import dayjs from 'dayjs';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { PunchPage } from './PunchPage';
+import { useRegistroHoje } from '@/hooks/useRegistrosPonto';
+import { useBaterPonto, useAlterarPonto } from '@/hooks/useMutacoesPonto';
+import { useConfiguracoes } from '@/hooks/useConfiguracoes';
 import { AllTheProviders } from '@/test/test-utils';
 
-vi.mock('@/hooks/useAuth', () => ({
-  useAuth: () => ({
-    usuario: { id: 'test-uid', email: 'user@email.com', criado_em: '2026-01-01T00:00:00Z' },
-    carregando: false,
-    entrar: vi.fn(),
-    cadastrar: vi.fn(),
-    sair: vi.fn(),
-  }),
-}));
+// Mock hooks
+vi.mock('@/hooks/useRegistrosPonto');
+vi.mock('@/hooks/useMutacoesPonto');
+vi.mock('@/hooks/useConfiguracoes');
 
-vi.mock('@/hooks/useTimeEntries', () => ({
-  useRegistroHoje: () => ({ data: null, isLoading: false }),
-  useRegistrosPonto: () => ({ data: [], isLoading: false }),
-}));
+const mockUseRegistroHoje = useRegistroHoje as unknown as ReturnType<typeof vi.fn>;
+const mockUseBaterPonto = useBaterPonto as unknown as ReturnType<typeof vi.fn>;
+const mockUseAlterarPonto = useAlterarPonto as unknown as ReturnType<typeof vi.fn>;
+const mockUseConfiguracoes = useConfiguracoes as unknown as ReturnType<typeof vi.fn>;
 
-vi.mock('@/hooks/usePunchMutations', () => ({
-  useBaterPonto: () => ({ mutate: vi.fn(), isPending: false }),
-  useAlterarPonto: () => ({ mutate: vi.fn(), isPending: false }),
-}));
-
-vi.mock('@/hooks/useSettings', () => ({
-  useConfiguracoes: () => ({
-    data: {
-      id: 'settings-1',
-      usuario_id: 'test-uid',
-      inicio_expediente: '08:00:00',
-      fim_expediente: '17:00:00',
-      almoco_inicio: '12:00:00',
-      almoco_fim: '13:00:00',
-      dias_trabalho: [1, 2, 3, 4, 5],
-      notificacoes_ativas: false,
-      notificacao_horario: '07:30:00',
-      jornada_minutos: 480,
-    },
-    isLoading: false,
-  }),
-  useAtualizarConfiguracoes: () => ({ mutate: vi.fn(), isPending: false }),
-}));
+const queryClient = new QueryClient();
 
 describe('PunchPage', () => {
-  it('renderiza relógio e horário atual', () => {
-    render(<PunchPage />, { wrapper: AllTheProviders });
+  beforeEach(() => {
+    // Reset mocks before each test
+    vi.clearAllMocks();
 
-    expect(screen.getByText('Bater Ponto')).toBeInTheDocument();
-    expect(screen.getByText(/Trabalhado hoje/)).toBeInTheDocument();
+    // Default mock implementations
+    mockUseRegistroHoje.mockReturnValue({ data: null, isLoading: false });
+    mockUseBaterPonto.mockReturnValue({ mutate: vi.fn(), isPending: false });
+    mockUseAlterarPonto.mockReturnValue({ mutate: vi.fn(), isPending: false });
+    mockUseConfiguracoes.mockReturnValue({ data: { jornada_minutos: 480 }, isLoading: false });
   });
 
-  it('renderiza botão de bater ponto', () => {
-    render(<PunchPage />, { wrapper: AllTheProviders });
+  const renderComponent = () =>
+    render(
+      <QueryClientProvider client={queryClient}>
+        <PunchPage />
+      </QueryClientProvider>
+    );
 
-    const punchButton = screen.getByRole('button', { name: /Bater ponto/i });
-    expect(punchButton).toBeInTheDocument();
+  it('mostra spinner enquanto carregando', () => {
+    mockUseRegistroHoje.mockReturnValue({ data: null, isLoading: true });
+    renderComponent();
+    expect(screen.getByRole('status')).toBeInTheDocument();
   });
 
-  it('mostra status "Nenhuma batida registrada hoje"', () => {
-    render(<PunchPage />, { wrapper: AllTheProviders });
+  it('mostra o botão de Entrada quando não há batidas', () => {
+    renderComponent();
+    expect(screen.getByRole('button', { name: /bater ponto/i })).toBeInTheDocument();
+    expect(screen.getByText(/próxima batida: entrada/i)).toBeInTheDocument();
+  });
 
-    expect(screen.getByText('Nenhuma batida registrada hoje')).toBeInTheDocument();
+  it('registra entrada ao clicar no botão', async () => {
+    const mockMutate = vi.fn();
+    mockUseBaterPonto.mockReturnValue({ mutate: mockMutate, isPending: false });
+    renderComponent();
+
+    const horaAtual = dayjs().format('HH:mm');
+
+    await userEvent.click(screen.getByRole('button', { name: /bater ponto/i }));
+    await userEvent.click(screen.getByRole('button', { name: /confirmar/i }));
+
+    await waitFor(() => {
+      expect(mockMutate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          tipo: 'entrada',
+          horario: expect.stringContaining(horaAtual),
+        })
+      );
+    });
+  });
+
+  it('permite editar uma batida existente', async () => {
+    const entry = {
+      id: '123',
+      data: '2024-01-01',
+      entrada: '2024-01-01T08:00:00Z',
+      saida_almoco: null,
+      retorno_almoco: null,
+      saida_final: null,
+    };
+    mockUseRegistroHoje.mockReturnValue({ data: entry, isLoading: false });
+    const mockAlterarMutate = vi.fn();
+    mockUseAlterarPonto.mockReturnValue({ mutate: mockAlterarMutate, isPending: false });
+    renderComponent();
+
+    await userEvent.click(screen.getByLabelText('Editar Entrada'));
+    await userEvent.type(screen.getByLabelText('Horário'), '08:30');
+    await userEvent.click(screen.getByRole('button', { name: 'Salvar' }));
+
+    await waitFor(() => {
+      expect(mockAlterarMutate).toHaveBeenCalledWith({
+        id: '123',
+        updates: {
+          entrada: '2024-01-01T08:30:00.000Z',
+        },
+      });
+    });
+  });
+
+  it('permite remover uma batida existente', async () => {
+    const entry = {
+      id: '123',
+      data: '2024-01-01',
+      entrada: '2024-01-01T08:00:00Z',
+      saida_almoco: null,
+      retorno_almoco: null,
+      saida_final: null,
+    };
+    mockUseRegistroHoje.mockReturnValue({ data: entry, isLoading: false });
+    const mockAlterarMutate = vi.fn();
+    mockUseAlterarPonto.mockReturnValue({ mutate: mockAlterarMutate, isPending: false });
+    renderComponent();
+
+    await userEvent.click(screen.getByLabelText('Remover Entrada'));
+    await userEvent.click(screen.getByRole('button', { name: 'Remover' }));
+
+    await waitFor(() => {
+      expect(mockAlterarMutate).toHaveBeenCalledWith({
+        id: '123',
+        updates: {
+          entrada: null,
+        },
+      });
+    });
   });
 });

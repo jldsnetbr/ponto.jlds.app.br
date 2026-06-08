@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
 import dayjs from 'dayjs';
-import { useConfiguracoes, useAtualizarConfiguracoes } from '@/hooks/useSettings';
-import { useFeriados, useAdicionarFeriado, useRemoverFeriado } from '@/hooks/useHolidays';
-import { useAuth } from '@/hooks/useAuth';
+import { useConfiguracoes, useAtualizarConfiguracoes } from '@/hooks/useConfiguracoes';
+import { useFeriados, useAdicionarFeriado, useRemoverFeriado } from '@/hooks/useFeriados';
+import { useAutenticacao } from '@/hooks/useAutenticacao';
 import { useToast, Card, Button, Input, TimePicker, Spinner } from '@/components/ui';
-import { requestNotificationPermission } from '@/lib/notifications';
-import { calcularJornada } from '@/lib/calculations';
+import { requestNotificationPermission } from '@/lib/notificacoes';
+import { calcularJornada } from '@/lib/calculos';
 
 const diasLabels = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
 
@@ -15,7 +15,7 @@ export function SettingsPage() {
   const { data: feriados } = useFeriados();
   const addFeriado = useAdicionarFeriado();
   const delFeriado = useRemoverFeriado();
-  const { sair } = useAuth();
+  const { sair } = useAutenticacao();
   const { showToast } = useToast();
 
   const [inicioExpediente, setInicioExpediente] = useState('08:00');

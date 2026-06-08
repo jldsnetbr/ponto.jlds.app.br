@@ -1,3 +1,4 @@
+import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Input } from './Input';
@@ -8,36 +9,62 @@ describe('Input', () => {
     expect(screen.getByLabelText('Email')).toBeInTheDocument();
   });
 
-  it('renderiza input do tipo email', () => {
-    render(<Input label="Email" type="email" />);
-    expect(screen.getByLabelText('Email')).toHaveAttribute('type', 'email');
-  });
-
-  it('mostra mensagem de erro', () => {
-    render(<Input label="Email" error="Email inválido" />);
-    expect(screen.getByText('Email inválido')).toBeInTheDocument();
-  });
-
-  it('não mostra erro quando não tem', () => {
+  it('associa label ao input via htmlFor', () => {
     render(<Input label="Email" />);
-    expect(screen.queryByText('Email inválido')).not.toBeInTheDocument();
+    const input = screen.getByLabelText('Email');
+    const label = screen.getByText('Email');
+    expect(input).toHaveAttribute('id');
+    expect(label).toHaveAttribute('for', input.id);
   });
 
-  it('chama onChange ao digitar', async () => {
+  it('permite id customizado', () => {
+    render(<Input label="Email" id="email-custom" />);
+    const input = screen.getByLabelText('Email');
+    expect(input).toHaveAttribute('id', 'email-custom');
+  });
+
+  it('aplica classe de erro quando error prop passado', () => {
+    render(<Input label="Email" error="Email inválido" />);
+    const input = screen.getByLabelText('Email');
+    expect(input).toHaveClass('border-red-500');
+    expect(screen.getByRole('alert')).toHaveTextContent('Email inválido');
+  });
+
+  it('define aria-invalid quando error', () => {
+    render(<Input label="Email" error="Email inválido" />);
+    const input = screen.getByLabelText('Email');
+    expect(input).toHaveAttribute('aria-invalid', 'true');
+  });
+
+  it('define aria-describedby quando error', () => {
+    render(<Input label="Email" error="Email inválido" />);
+    const input = screen.getByLabelText('Email');
+    expect(input).toHaveAttribute('aria-describedby');
+  });
+
+  it('não define aria-invalid quando sem error', () => {
+    render(<Input label="Email" />);
+    const input = screen.getByLabelText('Email');
+    expect(input).toHaveAttribute('aria-invalid', 'false');
+  });
+
+  it('chama onChange quando valor muda', async () => {
     const handleChange = vi.fn();
     render(<Input label="Email" onChange={handleChange} />);
-    await userEvent.type(screen.getByLabelText('Email'), 'a');
+    await userEvent.type(screen.getByLabelText('Email'), 'teste@email.com');
     expect(handleChange).toHaveBeenCalled();
   });
 
-  it('renderiza placeholder', () => {
-    render(<Input label="Email" placeholder="Digite seu email" />);
-    expect(screen.getByPlaceholderText('Digite seu email')).toBeInTheDocument();
+  it('passa props adicionais para input', () => {
+    render(<Input label="Email" placeholder="seu@email.com" autoComplete="email" />);
+    const input = screen.getByLabelText('Email');
+    expect(input).toHaveAttribute('placeholder', 'seu@email.com');
+    expect(input).toHaveAttribute('autoComplete', 'email');
   });
 
-  it('associa label ao input pelo htmlFor', () => {
-    render(<Input label="Senha" />);
-    const input = screen.getByLabelText('Senha');
-    expect(input).toHaveAttribute('id', 'senha');
+  it('aplica classe customizada', () => {
+    render(<Input label="Email" className="custom-class" />);
+    const input = screen.getByLabelText('Email');
+    expect(input).toHaveClass('custom-class');
   });
 });

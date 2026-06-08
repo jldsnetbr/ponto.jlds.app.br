@@ -1,125 +1,76 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { MemoryRouter } from 'react-router-dom';
-import { describe, it, expect, vi } from 'vitest';
+import { vi } from 'vitest';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { ProvedorAutenticacao, useAutenticacao } from '@/hooks/useAutenticacao';
 import { AuthPage } from './AuthPage';
 
-const mockSignIn = vi.fn();
-const mockSignUp = vi.fn();
+// Mock useAuth
+vi.mock('@/hooks/useAutenticacao', async (importOriginal) => {
+  const actual = await importOriginal();
+  return {
+    ...actual,
+    useAutenticacao: vi.fn(),
+  };
+});
 
-vi.mock('@/hooks/useAuth', () => ({
-  useAuth: () => ({
-    usuario: null,
-    carregando: false,
-    entrar: mockSignIn,
-    cadastrar: mockSignUp,
-    sair: vi.fn(),
-  }),
-}));
+const mockEntrar = vi.fn();
+
+const Wrapper = ({ children }: { children: React.ReactNode }) => (
+  <QueryClientProvider client={new QueryClient()}>
+    <ProvedorAutenticacao>
+    {children}
+    </ProvedorAutenticacao>
+  </QueryClientProvider>
+);
 
 describe('AuthPage', () => {
   beforeEach(() => {
+    // @ts-ignore
+    useAutenticacao.mockReturnValue({
+      usuario: null,
+      carregando: false,
+      entrar: mockEntrar,
+      sair: vi.fn(),
+    });
+  });
+
+  afterEach(() => {
     vi.clearAllMocks();
   });
 
-  it('renderiza formulário de login', () => {
-    render(
-      <MemoryRouter>
-        <AuthPage />
-      </MemoryRouter>
-    );
-
-    expect(screen.getByRole('heading', { name: 'Controle de Ponto' })).toBeInTheDocument();
-    expect(screen.getByLabelText('Email')).toBeInTheDocument();
-    expect(screen.getByLabelText('Senha')).toBeInTheDocument();
-    expect(screen.getByText('Entrar')).toBeInTheDocument();
+  it('renderiza corretamente', () => {
+    render(<AuthPage />, { wrapper: Wrapper });
+    expect(screen.getByRole('heading', { name: /controle de ponto/i })).toBeInTheDocument();
+    expect(screen.getByLabelText(/email/i)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /receber link de acesso/i })).toBeInTheDocument();
   });
 
-  it('alterna para modo registro', async () => {
-    render(
-      <MemoryRouter>
-        <AuthPage />
-      </MemoryRouter>
-    );
-
-    await userEvent.click(screen.getByText('Cadastre-se'));
-
-    expect(screen.getByText('Criar conta')).toBeInTheDocument();
-    expect(screen.getByLabelText('Confirmar senha')).toBeInTheDocument();
-    expect(screen.getByText('Faça login')).toBeInTheDocument();
+  it('exibe erro se email vazio', async () => {
+    render(<AuthPage />, { wrapper: Wrapper });
+    await userEvent.click(screen.getByRole('button', { name: /receber link de acesso/i }));
+    expect(screen.getByText(/preencha o email/i)).toBeInTheDocument();
   });
 
-  it('mostra erro para campos vazios no login', async () => {
-    render(
-      <MemoryRouter>
-        <AuthPage />
-      </MemoryRouter>
-    );
+  it('chama entrar e exibe mensagem de sucesso', async () => {
+    mockEntrar.mockResolvedValue({ envioOk: true, mensagem: 'Sucesso' });
+    render(<AuthPage />, { wrapper: Wrapper });
 
-    await userEvent.click(screen.getByText('Entrar'));
+    await userEvent.type(screen.getByLabelText(/email/i), 'teste@example.com');
+    await userEvent.click(screen.getByRole('button', { name: /receber link de acesso/i }));
 
-    expect(screen.getByText('Preencha todos os campos')).toBeInTheDocument();
+    expect(mockEntrar).toHaveBeenCalledWith('teste@example.com');
+    expect(screen.getByText(/verifique seu email e clique no link para entrar./i)).toBeInTheDocument();
   });
 
-  it('valida senha mínima de 6 caracteres no registro', async () => {
-    render(
-      <MemoryRouter>
-        <AuthPage />
-      </MemoryRouter>
-    );
+  it('exibe erro ao falhar entrar', async () => {
+    mockEntrar.mockRejectedValue(new Error('Erro de teste'));
+    render(<AuthPage />, { wrapper: Wrapper });
 
-    await userEvent.click(screen.getByText('Cadastre-se'));
-    await userEvent.type(screen.getByLabelText('Email'), 'test@email.com');
-    await userEvent.type(screen.getByLabelText('Senha'), '123');
-    await userEvent.type(screen.getByLabelText('Confirmar senha'), '123');
-    await userEvent.click(screen.getByText('Criar conta'));
+    await userEvent.type(screen.getByLabelText(/email/i), 'teste@example.com');
+    await userEvent.click(screen.getByRole('button', { name: /receber link de acesso/i }));
 
-    expect(screen.getByText('Senha deve ter no mínimo 6 caracteres')).toBeInTheDocument();
-  });
-
-  it('valida que senhas coincidem no registro', async () => {
-    render(
-      <MemoryRouter>
-        <AuthPage />
-      </MemoryRouter>
-    );
-
-    await userEvent.click(screen.getByText('Cadastre-se'));
-    await userEvent.type(screen.getByLabelText('Email'), 'test@email.com');
-    await userEvent.type(screen.getByLabelText('Senha'), '123456');
-    await userEvent.type(screen.getByLabelText('Confirmar senha'), '654321');
-    await userEvent.click(screen.getByText('Criar conta'));
-
-    expect(screen.getByText('As senhas não coincidem')).toBeInTheDocument();
-  });
-
-  it('chama signIn com email e senha no login', async () => {
-    render(
-      <MemoryRouter>
-        <AuthPage />
-      </MemoryRouter>
-    );
-
-    await userEvent.type(screen.getByLabelText('Email'), 'user@email.com');
-    await userEvent.type(screen.getByLabelText('Senha'), '123456');
-    await userEvent.click(screen.getByText('Entrar'));
-
-    expect(mockSignIn).toHaveBeenCalledWith('user@email.com', '123456');
-  });
-
-  it('chama signUp com email e senha no registro', async () => {
-    render(
-      <MemoryRouter>
-        <AuthPage />
-      </MemoryRouter>
-    );
-
-    await userEvent.click(screen.getByText('Cadastre-se'));
-    await userEvent.type(screen.getByLabelText('Email'), 'new@email.com');
-    await userEvent.type(screen.getByLabelText('Senha'), '123456');
-    await userEvent.type(screen.getByLabelText('Confirmar senha'), '123456');
-    await userEvent.click(screen.getByText('Criar conta'));
-
-    expect(mockSignUp).toHaveBeenCalledWith('new@email.com', '123456');
+    expect(mockEntrar).toHaveBeenCalledWith('teste@example.com');
+    expect(screen.getByText(/erro de teste/i)).toBeInTheDocument();
   });
 });

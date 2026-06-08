@@ -1,4 +1,4 @@
-import { cn } from '@/lib/utils';
+import { cn } from '@/lib/utilitarios';
 import type { TipoBatida } from '@/types';
 
 interface PunchButtonProps {
@@ -16,12 +16,15 @@ const labels: Record<TipoBatida, string> = {
 
 export function PunchButton({ nextPunchType, onPunch, disabled }: PunchButtonProps) {
   const completo = !nextPunchType;
+  const isDisabled = completo || disabled;
 
   return (
     <div className="flex flex-col items-center gap-4">
       <button
         onClick={onPunch}
-        disabled={completo || disabled}
+        disabled={isDisabled}
+        aria-disabled={isDisabled}
+        aria-pressed={false}
         className={cn(
           'w-48 h-48 rounded-full font-bold text-xl text-white shadow-lg transition-all active:scale-95',
           'flex flex-col items-center justify-center gap-2',

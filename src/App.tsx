@@ -1,34 +1,35 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthPage } from '@/pages/AuthPage';
 import { Layout } from '@/components/layout/Layout';
-import { ProtectedRoute } from '@/components/ProtectedRoute';
+import { RotaProtegida } from '@/components/RotaProtegida';
 import { PunchPage } from '@/pages/PunchPage';
 import { BankPage } from '@/pages/BankPage';
 import { HistoryPage } from '@/pages/HistoryPage';
 import { SettingsPage } from '@/pages/SettingsPage';
-import { ErrorBoundary } from '@/components/ErrorBoundary';
+import { LimiteDeErro } from '@/components/LimiteDeErro';
+import { ROTAS } from '@/lib/rotas';
 
 export default function App() {
   return (
-    <ErrorBoundary>
+    <LimiteDeErro>
       <BrowserRouter>
       <Routes>
-        <Route path="/login" element={<AuthPage />} />
+        <Route path={ROTAS.LOGIN} element={<AuthPage />} />
         <Route
           element={
-            <ProtectedRoute>
+            <RotaProtegida>
               <Layout />
-            </ProtectedRoute>
+            </RotaProtegida>
           }
         >
-          <Route path="/" element={<Navigate to="/ponto" replace />} />
-          <Route path="/ponto" element={<PunchPage />} />
-          <Route path="/banco" element={<BankPage />} />
-          <Route path="/historico" element={<HistoryPage />} />
-          <Route path="/configuracoes" element={<SettingsPage />} />
+          <Route path="/" element={<Navigate to={ROTAS.PONTO} replace />} />
+          <Route path={ROTAS.PONTO} element={<PunchPage />} />
+          <Route path={ROTAS.BANCO} element={<BankPage />} />
+          <Route path={ROTAS.HISTORICO} element={<HistoryPage />} />
+          <Route path={ROTAS.CONFIGURACOES} element={<SettingsPage />} />
         </Route>
       </Routes>
     </BrowserRouter>
-    </ErrorBoundary>
+    </LimiteDeErro>
   );
 }

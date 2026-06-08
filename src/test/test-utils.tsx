@@ -1,38 +1,36 @@
-import { render, RenderOptions } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom';
+import { render } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ToastProvider } from '@/components/ui';
-import React from 'react';
+import { ProvedorAutenticacao } from '@/hooks/useAutenticacao';
+import { vi } from 'vitest';
 
-function createTestQueryClient() {
-  return new QueryClient({
-    defaultOptions: {
-      queries: { retry: false },
-    },
-  });
-}
+// Mock useAuth
+vi.mock('@/hooks/useAutenticacao', async (importOriginal) => {
+  const actual = await importOriginal();
+  return {
+    ...actual,
+    useAutenticacao: vi.fn(() => ({
+      usuario: { id: 'test-user', email: 'test@example.com', criado_em: '2024-01-01' },
+      carregando: false,
+      entrar: vi.fn(),
+      sair: vi.fn(),
+    })),
+  };
+});
 
-interface WrapperProps {
-  children: React.ReactNode;
-}
+const queryClient = new QueryClient();
 
-export function AllTheProviders({ children }: WrapperProps) {
-  const queryClient = createTestQueryClient();
-
+export function AllTheProviders({ children }: { children: React.ReactNode }) {
   return (
     <QueryClientProvider client={queryClient}>
-      <MemoryRouter>
-        <ToastProvider>
-          {children}
-        </ToastProvider>
-      </MemoryRouter>
+      <ProvedorAutenticacao>
+        {children}
+      </ProvedorAutenticacao>
     </QueryClientProvider>
   );
 }
 
-export function renderWithProviders(
-  ui: React.ReactElement,
-  options?: Omit<RenderOptions, 'wrapper'>
-) {
+export function customRender(ui: React.ReactElement, options?: any) {
   return render(ui, { wrapper: AllTheProviders, ...options });
 }
+
+export * from '@testing-library/react';

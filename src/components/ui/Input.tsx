@@ -1,29 +1,30 @@
-import { cn } from '@/lib/utils';
+import { cn } from '@/lib/utilitarios';
+import { useId } from 'react';
 
 interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
-  label: string;
-  error?: string;
+  label?: string;
+  containerClassName?: string;
 }
 
-export function Input({ label, error, className, id, ...props }: InputProps) {
-  const inputId = id || label.toLowerCase().replace(/\s/g, '-');
+export function Input({ label, id, className, containerClassName, ...props }: InputProps) {
+  const inputId = useId();
+  const finalId = id || inputId;
 
   return (
-    <div className="flex flex-col gap-1">
-      <label htmlFor={inputId} className="text-sm font-medium text-gray-700">
-        {label}
-      </label>
+    <div className={cn('flex flex-col gap-1', containerClassName)}>
+      {label && (
+        <label htmlFor={finalId} className="text-sm font-medium text-gray-700">
+          {label}
+        </label>
+      )}
       <input
-        id={inputId}
+        id={finalId}
         className={cn(
-          'rounded-lg border px-3 py-2 text-base transition-colors min-h-[44px]',
-          'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
-          error ? 'border-red-500' : 'border-gray-300',
+          'rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500',
           className
         )}
         {...props}
       />
-      {error && <span className="text-xs text-red-500">{error}</span>}
     </div>
   );
 }

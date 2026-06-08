@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import dayjs from 'dayjs';
-import { useRegistrosPonto } from '@/hooks/useTimeEntries';
-import { calcularSaldoMensal } from '@/lib/calculations';
-import { formatarMinutos, cn } from '@/lib/utils';
+import { useRegistrosPonto } from '@/hooks/useRegistrosPonto';
+import { calcularSaldoMensal } from '@/lib/calculos';
+import { formatarMinutos, cn } from '@/lib/utilitarios';
 import { Card, Spinner } from '@/components/ui';
+import { construirHistoricoComDia } from '@/lib/rotas';
 
 const diasSemana = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
 
@@ -58,7 +59,7 @@ export function BankPage() {
             return (
                 <Card
                   key={dia.data}
-                  onClick={() => { if (dia.entry) navigate(`/history?dia=${dia.data}`); }}
+                  onClick={() => { if (dia.entry) navigate(construirHistoricoComDia(dia.data)); }}
                 className={cn('flex items-center justify-between py-3', !dia.entry && 'opacity-50')}
               >
                 <div className="flex items-center gap-3">

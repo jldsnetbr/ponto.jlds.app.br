@@ -1,36 +1,49 @@
-import { cn } from '@/lib/utils';
+import { cn } from '@/lib/utilitarios';
+import { Slot } from '@radix-ui/react-slot';
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'secondary' | 'danger';
-  size?: 'sm' | 'md' | 'lg';
+  asChild?: boolean;
+  variant?: 'primary' | 'secondary' | 'danger' | 'ghost';
+  size?: 'default' | 'sm' | 'lg';
   fullWidth?: boolean;
 }
 
-const variants = {
-  primary: 'bg-blue-500 text-white active:bg-blue-600',
-  secondary: 'bg-gray-200 text-gray-800 active:bg-gray-300',
-  danger: 'bg-red-500 text-white active:bg-red-600',
-};
+export function Button({
+  className,
+  asChild = false,
+  variant = 'primary',
+  size = 'default',
+  fullWidth = false,
+  ...props
+}: ButtonProps) {
+  const Comp = asChild ? Slot : 'button';
 
-const sizes = {
-  sm: 'px-3 py-1.5 text-sm',
-  md: 'px-4 py-2 text-base',
-  lg: 'px-6 py-3 text-lg',
-};
+  const baseStyles = 
+    'inline-flex items-center justify-center rounded-lg font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none';
 
-export function Button({ variant = 'primary', size = 'md', fullWidth, className, children, ...props }: ButtonProps) {
+  const variantStyles = {
+    primary: 'bg-blue-500 text-white hover:bg-blue-600 focus-visible:ring-blue-500',
+    secondary: 'bg-gray-200 text-gray-700 hover:bg-gray-300 focus-visible:ring-gray-500',
+    danger: 'bg-red-500 text-white hover:bg-red-600 focus-visible:ring-red-500',
+    ghost: 'hover:bg-gray-100 text-gray-700 focus-visible:ring-gray-500',
+  };
+
+  const sizeStyles = {
+    default: 'h-10 px-4 py-2 text-sm',
+    sm: 'h-9 px-3 text-sm',
+    lg: 'h-11 px-8 text-lg',
+  };
+
   return (
-    <button
+    <Comp
       className={cn(
-        'rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px] min-w-[44px]',
-        variants[variant],
-        sizes[size],
+        baseStyles,
+        variantStyles[variant],
+        sizeStyles[size],
         fullWidth && 'w-full',
         className
       )}
       {...props}
-    >
-      {children}
-    </button>
+    />
   );
 }
